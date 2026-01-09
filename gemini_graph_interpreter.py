@@ -87,11 +87,17 @@ def interpret_radial_psd(psd1D, features_dict, api_key=None):
         drop_70_80 = val_70 - val_80
         drop_80_90 = val_80 - val_90
         
+        # Calculează scorul matematic pentru context
+        math_score = features_dict.get('suspicion_score', 0)
+        
         img_base64 = fig_to_base64(fig)
         plt.close(fig)
         
         # Prompt ULTRA-SPECIFIC pentru gpt-4o cu analiza vizuală detaliată
         prompt = f"""EXPERT FFT ANALYSIS pentru detectare DEEPFAKE. Analizează VISUAL graficul.
+
+🔢 SCOR MATEMATIC CALCULAT: {math_score}/100 puncte suspiciune AI
+→ {'⚠️ SUSPECT AI!' if math_score > 70 else '✅ Probabil REAL' if math_score < 40 else '⚠️ Incert'}
 
 📊 CONTEXT: Radial PSD (Power Spectral Density) - Analiza spectru frecvență FFT.
 
@@ -217,26 +223,30 @@ def interpret_2d_spectrum(magnitude_2d, api_key=None):
 
 GRAFIC: Heatmap 2D - centru luminos (galben/roșu).
 
-⚠️ IMPORTANT: Linii radiale fine din centru sunt NORMALE în FFT! NU înseamnă AI!
+⚠️ IMPORTANT CRITICAL: 
+• Linii radiale FINE din centru = NORMALE! Toate FFT-urile le au! NU înseamnă AI!
+• Doar linii groase/grilă VIZIBILĂ sau puncte izolate = AI
 
 ✅ REAL:
 - Centru luminos circular smooth
-- Scădere lină spre margini
-- Linii radiale FINE din centru = OK (e normal FFT)
+- Scădere lină spre margini (gradient roșu → violet → albastru)
+- Linii radiale FINE din centru = OK (pattern natural FFT)
 - Simetrie față de centru
+- Poate avea niște "zgomot" uniform în colțuri (normal JPEG)
 
-🤖 AI:
-- GRILĂ VIZIBILĂ (linii orizontale/verticale groase)
-- Puncte luminoase IZOLATE departe de centru (>30% distanță)
-- Pattern X sau + foarte clar geometric
-- Asimetrii MAJORE (o parte luminoasă, alta întunecată)
+🤖 AI (DOAR dacă vezi CLAR):
+- GRILĂ GROASĂ VIZIBILĂ (linii orizontale/verticale GROASE, nu fine)
+- Puncte luminoase IZOLATE departe de centru (>40% distanță, foarte clar separate)
+- Pattern X sau + FOARTE GEOMETRIC și PRONUNȚAT (nu doar linii radiale fine)
+- Asimetrii MAJORE clare (jumătate luminoasă, jumătate întunecată)
 
-🔍 Uită-te:
-- Ai grilă sau doar linii radiale fine? (fine = NORMAL)
-- Ai puncte izolate departe de centru?
-- E simetric sau asimetric?
+🔍 Întreabă-te:
+1. Văd grilă GROASĂ sau doar linii radiale fine naturale? (fine = REAL)
+2. Văd puncte izolate CLARE departe de centru? (nu = REAL)
+3. E foarte asimetric sau normal simetric? (simetric = REAL)
 
-Dacă e doar centru luminos + linii radiale fine → REAL
+Dacă răspunsul la 1,2,3 este "nu/normal" → REAL
+Dacă răspunsul la 1 SAU 2 SAU 3 este "DA CLAR" → AI
 
 ⚠️ CRITICAL: Răspunde DOAR cu JSON valid, FĂRĂ markdown (###), FĂRĂ text extra!
 Format exact:

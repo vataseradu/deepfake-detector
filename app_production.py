@@ -190,7 +190,7 @@ if uploaded_file:
             
             with score_col3:
                 st.markdown("#### Verdict Combinat")
-                st.markdown("*(Final: Math 40% + AI 60%)*")
+                st.markdown("*(Final: Math 60% + AI 40%)*")
                 st.info("Se calculează...")
             
             st.markdown("---")
@@ -290,8 +290,8 @@ if uploaded_file:
                             else:
                                 ai_score = 50
                             
-                            combined_score = (math_score_ai * 0.4) + (ai_score * 0.6)
-                            combined_verdict = "AI-GENERATED" if combined_score > 55 else "REAL"
+                            combined_score = (math_score_ai * 0.6) + (ai_score * 0.4)
+                            combined_verdict = "AI-GENERATED" if combined_score > 50 else "REAL"
                             
                             st.markdown("---")
                             st.markdown("#### Comparație Scoruri")
