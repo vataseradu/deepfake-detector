@@ -23,34 +23,42 @@ Advanced deepfake detection system using FFT (Fast Fourier Transform) analysis c
 
 ### Quick Start (Recommended)
 
-**Access the live application:** [Your Streamlit Cloud URL]
+**Access the live application:** [Streamlit Cloud - Deepfake Detector](https://vataseradu-deepfake-detector.streamlit.app)
 
 No installation needed - works directly in browser!
 
 ### Local Installation
 
 Prerequisites:
-- Python 3.8+
-- OpenAI API Key (optional - for AI interpretation)
+- Python 3.10+
+- OpenAI API Key (optional - for AI interpretation features)
 
 Setup:
 
 1. Clone repository:
 ```bash
-git clone https://github.com/your-username/deepfake-detector.git
+git clone https://github.com/vataseradu/deepfake-detector.git
 cd deepfake-detector
 ```
 
-2. Install dependencies:
+2. Create virtual environment:
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configure API Key (optional):
-   - Open `gemini_graph_interpreter.py`
-   - Add OpenAI API key on line 13
+4. Configure API Key (optional - see [SETUP_LOCAL.md](SETUP_LOCAL.md)):
+   - Set environment variable: `OPENAI_API_KEY=sk-...`
+   - Or create `.env` file with your key
+   - Application works WITHOUT API key (mathematical analysis only)
 
-4. Run application:
+5. Run application:
 ```bash
 streamlit run app_production.py
 ```
@@ -210,6 +218,19 @@ fig.savefig("frequency_analysis.png")
 - ✅ Use `use_container_width=True` instead of deprecated `width` parameter
 - ✅ Implement tabs for multi-module interfaces
 - ✅ Provide sidebar configuration options
+
+### Security & Privacy
+- ✅ No API keys committed to repository
+- ✅ No personal paths in source code
+- ✅ All sensitive data in `.gitignore`
+- ✅ See [SETUP_LOCAL.md](SETUP_LOCAL.md) for local configuration
+
+## 📚 Documentation Files
+
+- **[SETUP_LOCAL.md](SETUP_LOCAL.md)** - Local development setup & API configuration
+- **[TESTING_GUIDE_v2.md](TESTING_GUIDE_v2.md)** - Comprehensive testing procedures
+- **[IMPROVEMENTS_SUMMARY.md](IMPROVEMENTS_SUMMARY.md)** - All enhancements log
+- **[FIX_REAL_CLASSIFICATION.md](FIX_REAL_CLASSIFICATION.md)** - Bug fixes documentation
 
 ## 🔮 Future Enhancements
 
