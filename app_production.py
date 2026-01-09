@@ -154,23 +154,24 @@ if uploaded_file:
             }
             
             st.markdown("---")
-            st.markdown("## Analiză Completă: Matematică + AI")
+            st.markdown("## Analiza completa: Matematica + AI")
             
-            st.markdown("### Scoruri de Detecție")
-            score_col1, score_col2, score_col3 = st.columns(3)
+            st.markdown("### 🎯 VERDICT PRINCIPAL")
             
-            with score_col1:
-                st.markdown("#### Scor Matematic")
-                st.markdown("*(Fără API - doar calcule)*")
+            verdict_col1, verdict_col2 = st.columns(2)
+            
+            with verdict_col1:
+                st.markdown("#### Scor Matematic (Random Forest)")
+                st.caption("*Bazat pe 5 features FFT antrenate pe 2041 imagini*")
                 if math_score_ai > 70:
                     st.error(f"**AI: {math_score_ai:.0f}%**")
-                    st.caption("SUSPECT AI")
+                    st.caption("🚨 SUSPECT AI")
                 elif math_score_ai > 50:
                     st.warning(f"**AI: {math_score_ai:.0f}%**")
-                    st.caption("INCERT")
+                    st.caption("⚠️ INCERT")
                 else:
                     st.success(f"**REAL: {100-math_score_ai:.0f}%**")
-                    st.caption("PROBABIL REAL")
+                    st.caption("✅ PROBABIL REAL")
                 
                 st.markdown(f"**Verdict:** {math_verdict}")
                 
@@ -213,7 +214,7 @@ if uploaded_file:
                 st.caption(delta_decay)
             
             st.markdown("**Tail Gradients:**")
-            tail_col1, tail_col2, tail_col3, tail_col4 = st.columns(4)
+            tail_col1, tail_col2, tail_col3 = st.columns(3)
             with tail_col1:
                 st.metric("Tail 70%", f"{features_dict['tail_70']:.3f} dB/px")
             with tail_col2:
@@ -222,26 +223,17 @@ if uploaded_file:
                 st.metric("Tail 90%", f"{features_dict['tail_90']:.3f} dB/px")
                 delta_90 = "Flat" if features_dict['tail_90'] > -1.0 else "Natural"
                 st.caption(delta_90)
-            with tail_col4:
-                suspicion = fft_patterns.get('suspicion_score', 0)
-                st.metric("Suspicion Score", f"{suspicion}/100")
-                if suspicion > 70:
-                    st.caption("ALERT: High AI probability")
-                elif suspicion > 40:
-                    st.caption("WARNING: Moderate suspicion")
-                else:
-                    st.caption("CLEAR: Low suspicion")
             
             st.markdown("---")
             
-            st.markdown("## VERDICT PRINCIPAL")
-            st.caption("Bazat pe analiza frecventiala FFT - antrenat pe dataset-uri validate")
+            st.markdown("## 🎯 VERDICT PRINCIPAL")
+            st.caption("*Bazat pe Random Forest antrenat pe 2041 imagini (960 AI + 1081 reale)*")
             
             verdict_col1, verdict_col2 = st.columns(2)
             
             with verdict_col1:
-                st.markdown("### Analiza Matematica FFT")
-                st.caption("Dataset: imagini reale vs. generate AI (Stable Diffusion, Midjourney, GAN)")
+                st.markdown("### 🔢 Analiza matematica FFT")
+                st.caption("5 features: tail_70, tail_80, tail_90, hf_lf_ratio, std_power")
                 
                 if math_score_ai > 70:
                     st.error(f"### {math_score_ai:.0f}% SUSPICIUNE AI")
@@ -252,24 +244,15 @@ if uploaded_file:
                 else:
                     st.success(f"### {100-math_score_ai:.0f}% REAL")
                     st.markdown(f"**Verdict:** {math_verdict}")
-                
-                suspicion = fft_patterns.get('suspicion_score', 0)
-                st.metric("Suspicion Score", f"{suspicion}/100")
-                if suspicion > 70:
-                    st.caption("⚠️ ALERT: High AI probability")
-                elif suspicion > 40:
-                    st.caption("⚠️ WARNING: Moderate suspicion")
-                else:
-                    st.caption("✅ CLEAR: Low suspicion")
             
             with verdict_col2:
                 if OPENAI_AVAILABLE and api_key_loaded:
-                    st.markdown("### Interpretare Grafice (gpt-4o)")
-                    st.caption("OpenAI primeste DOAR graficele FFT, NU imaginea")
-                    st.info("Se va calcula dupa generare grafice...")
+                    st.markdown("### 🤖 Interpretare GPT-4o")
+                    st.caption("*Analizeaza graficele FFT + analize suplimentare*")
+                    st.info("⏳ Rezultatul va aparea dupa ce toate graficele sunt generate")
                 else:
-                    st.markdown("### Interpretare AI (Optional)")
-                    st.warning("OpenAI indisponibil - verifica API Key")
+                    st.markdown("#### Interpretare AI (Optional)")
+                    st.warning("⚠️ OpenAI indisponibil - verifica API Key")
             
             st.markdown("---")
             
@@ -316,7 +299,7 @@ if uploaded_file:
                                 'val_80': float(val_80),
                                 'val_90': float(val_90)
                             }
-                            result = interpret_radial_psd(psd1D, features_dict, psd_text_values, api_key=OPENAI_API_KEY)
+                            result = interpret_radial_psd(psd1D, features_dict, psd_text_values=psd_text_values, api_key=OPENAI_API_KEY)
                             interpretations['radial_psd'] = result
                             
                             # Fix: Foloseste correct confidence
@@ -337,7 +320,7 @@ if uploaded_file:
                             combined_verdict = "AI-GENERATED" if combined_score > 50 else "REAL"
                             
                             st.markdown("---")
-                            st.markdown("#### Comparație Scoruri")
+                            st.markdown("#### 🎯 Comparatie scoruri")
                             comp_col1, comp_col2, comp_col3 = st.columns(3)
                             
                             with comp_col1:
@@ -364,11 +347,11 @@ if uploaded_file:
                             st.markdown(f"**Raționament OpenAI:** {result.get('reasoning', 'N/A')}")
                             
                             if result.get('indicators'):
-                                with st.expander("Indicatori Detectați"):
+                                with st.expander("🔍 Indicatori detectati"):
                                     for ind in result['indicators']:
                                         st.markdown(f"- {ind}")
                             
-                            with st.expander("Detalii Complete (Pentru Disertație)"):
+                            with st.expander("📋 Detalii complete (pentru disertatie)"):
                                 complete_data = {
                                     'psd_analysis': {
                                         'points': len(psd1D),
@@ -409,7 +392,7 @@ if uploaded_file:
             
             st.markdown("---")
             
-            st.markdown("### 2. Spectru 2D FFT")
+            st.markdown("#### 2. Spectru 2D FFT")
             
             if magnitude_2d is not None:
                 with st.expander("Afiseaza grafic Spectru 2D FFT", expanded=False):
@@ -447,10 +430,11 @@ if uploaded_file:
             st.markdown("---")
             
             if OPENAI_AVAILABLE and api_key_loaded and interpretations:
-                st.markdown("## Interpretare Suplimentara OpenAI")
-                st.caption("Analiza AI DOAR pe graficele FFT (fara acces la imaginea originala)")
+                st.markdown("---")
+                st.markdown("## 🤖 Verdict final OpenAI GPT-4o")
+                st.caption("*Sinteza analizei FFT + grafice suplimentare (color, gradient, noise)*")
                 
-                with st.spinner("OpenAI agregă toate analizele..."):
+                with st.spinner("⏳ GPT-4o agrega toate datele..."):
                     try:
                         final = get_final_verdict(interpretations, features_dict, fft_patterns)
                         
@@ -468,18 +452,18 @@ if uploaded_file:
                         
                         with vcol2:
                             if final.get('key_findings'):
-                                st.markdown("**Concluzii Cheie:**")
+                                st.markdown("**Concluzii cheie:**")
                                 for finding in final['key_findings'][:3]:
                                     st.markdown(f"• {finding}")
                         
                         with vcol3:
                             if final.get('graph_votes'):
-                                st.markdown("**Voturi Grafice:**")
+                                st.markdown("**Voturi grafice:**")
                                 votes = final['graph_votes']
                                 st.caption(f"📊 PSD Radial: {votes.get('radial_psd', 'N/A')}")
                                 st.caption(f"🎨 Spectrum 2D: {votes.get('spectrum_2d', 'N/A')}")
                         
-                        with st.expander("📋 Raționament Complet OpenAI"):
+                        with st.expander("📋 Rationament complet OpenAI"):
                             st.write(final.get('reasoning', 'N/A'))
                         
 
@@ -489,10 +473,11 @@ if uploaded_file:
                         st.code(traceback.format_exc())
             
             st.markdown("---")
-            st.markdown("## 📊 Analize Suplimentare")
+            st.markdown("## 📊 Analize suplimentare")
+            st.caption("*Metode complementare: color, gradient, noise, metadata*")
             
             # 3. Color Histogram
-            with st.expander("🌈 Color Histogram - Distributie Canale RGB"):
+            with st.expander("🌈 Color Histogram - distributie canale RGB"):
                 fig3, ax3 = plt.subplots(figsize=(12, 6))
                 colors = ('r', 'g', 'b')
                 for i, color in enumerate(colors):
@@ -518,7 +503,7 @@ if uploaded_file:
                     st.warning("⚠️ Distribuție neuniformă - posibilă procesare artificială")
             
             # 4. Gradient Magnitude Map
-            with st.expander("📐 Gradient Magnitude - Harta de Detalii"):
+            with st.expander("📐 Gradient Magnitude - harta de detalii"):
                 gray_img = np.mean(img_array, axis=2).astype(np.float32)
                 
                 # Sobel gradients
@@ -551,7 +536,7 @@ if uploaded_file:
                     st.info("✅ Gradient variat - texturi naturale")
             
             # 5. Noise Pattern Analysis
-            with st.expander("🔍 Noise Pattern - Analiza Zgomotului"):
+            with st.expander("🔍 Noise Pattern - analiza zgomotului"):
                 # High-pass filter pentru noise
                 gray_img = np.mean(img_array, axis=2).astype(np.float32)
                 blurred = cv2.GaussianBlur(gray_img, (5, 5), 0)
