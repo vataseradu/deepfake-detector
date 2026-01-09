@@ -267,11 +267,11 @@ if uploaded_file:
                 ax1.set_xlabel('Radial Frequency (pixels)', fontsize=14, fontweight='bold')
                 ax1.set_ylabel('Power (dB)', fontsize=14, fontweight='bold')
                 ax1.set_title('FFT Radial PSD - Frequency Analysis', fontsize=15, fontweight='bold')
-                    ax1.grid(True, alpha=0.4, linestyle=':')
-                    ax1.legend(loc='upper right', fontsize=10)
-                    
-                    st.pyplot(fig1)
-                    plt.close(fig1)
+                ax1.grid(True, alpha=0.4, linestyle=':')
+                ax1.legend(loc='upper right', fontsize=10)
+                
+                st.pyplot(fig1)
+                plt.close(fig1)
                 
                 if OPENAI_AVAILABLE and api_key_loaded:
                     with st.spinner("Analyzing FFT with OpenAI..."):
