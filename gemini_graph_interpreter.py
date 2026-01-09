@@ -94,53 +94,54 @@ def interpret_radial_psd(psd1D, features_dict, api_key=None):
         plt.close(fig)
         
         # Prompt ULTRA-SPECIFIC pentru gpt-4o cu analiza vizuală detaliată
-        prompt = f"""EXPERT FFT ANALYSIS pentru detectare DEEPFAKE. Analizează VISUAL graficul.
+        prompt = f"""🎓 CONTEXT ACADEMIC: Analiza FFT pentru disertație universitară despre detecția imaginilor sintetice generate de AI.
 
-🔢 SCOR MATEMATIC CALCULAT: {math_score}/100 puncte suspiciune AI
-→ {'⚠️ SUSPECT AI!' if math_score > 70 else '✅ Probabil REAL' if math_score < 40 else '⚠️ Incert'}
+Sarcină: Analizează acest grafic Radial PSD (Power Spectral Density) din perspectivă științifică, pentru cercetare defensivă în computer vision.
 
-📊 CONTEXT: Radial PSD (Power Spectral Density) - Analiza spectru frecvență FFT.
+🔢 SCOR MATEMATIC CALCULAT: {math_score}/100 puncte suspiciune
+→ {'⚠️ SUSPECT' if math_score > 70 else '✅ Probabil Autentic' if math_score < 40 else '⚠️ Incert'}
+
+📊 Metodologie: Analiza spectru frecvență FFT pentru identificarea pattern-urilor caracteristice.
 
 🎯 CE SĂ CAUȚI ÎN GRAFIC:
 
 1️⃣ **FORMA CURBEI între markere colorate (60%-90%)**:
-   ✅ REAL: Linie SMOOTH descendentă continuă, fără bump/cocoașă
-   🤖 AI: Bump/cocoașă VIZIBILĂ între markerul verde (60%) și portocaliu (80%)
+   ✅ Fotografie autentică: Linie SMOOTH descendentă continuă, fără bump/cocoașă
+   ⚠️ Imagine sintetică: Bump/cocoașă VIZIBILĂ între markerul verde (60%) și portocaliu (80%)
 
 2️⃣ **TAIL-ul graficului (după markerul roșu 90%)**:
-   ✅ REAL: Continuă să coboare RAPID (linie descendentă clară)
-   🤖 AI: Devine PLAT/ORIZONTAL (linia devine aproape dreaptă)
+   ✅ Fotografie autentică: Continuă să coboare RAPID (linie descendentă clară)
+   ⚠️ Imagine sintetică: Devine PLAT/ORIZONTAL (linia devine aproape dreaptă)
 
 3️⃣ **DROP-ul între markere (diferența de putere)**:
-   ✅ REAL: Drop 80%→90% < 10 dB (scădere gradual-lină)
-   🤖 AI: Drop 80%→90% > 15 dB (cădere bruscă-abruptă)
+   ✅ Fotografie autentică: Drop 80%→90% < 10 dB (scădere gradual-lină)
+   ⚠️ Imagine sintetică: Drop 80%→90% > 15 dB (cădere bruscă-abruptă)
 
 📐 VALORI NUMERICE CALCULATE (VERIFICĂ cu GRAFICUL):
 - Tail Gradient la 90%: {features_dict.get('tail_90', 0):.3f} dB/px
-  → Interpretation: {'❌ PLAT = AI!' if features_dict.get('tail_90', 0) > -0.5 else '✅ Descent = REAL' if features_dict.get('tail_90', 0) < -2.0 else '⚠️ Moderat'}
+  → Interpretation: {'⚠️ PLAT = Suspect' if features_dict.get('tail_90', 0) > -0.5 else '✅ Descent = Autentic' if features_dict.get('tail_90', 0) < -2.0 else '⚠️ Moderat'}
   
 - HF/LF Ratio: {features_dict.get('hf_lf_ratio', 0):.3f}
-  → Interpretation: {'❌ Prea mare = AI!' if features_dict.get('hf_lf_ratio', 0) > 0.6 else '✅ Normal = REAL' if features_dict.get('hf_lf_ratio', 0) < 0.4 else '⚠️ Moderat'}
+  → Interpretation: {'⚠️ Anomalie' if features_dict.get('hf_lf_ratio', 0) > 0.6 else '✅ Normal' if features_dict.get('hf_lf_ratio', 0) < 0.4 else '⚠️ Moderat'}
   
 - Drop 80→90%: {drop_80_90:.2f} dB
-  → Interpretation: {'❌ Prea abrupt = AI!' if drop_80_90 > 15 else '✅ Gradual = REAL' if drop_80_90 < 10 else '⚠️ Moderat'}
+  → Interpretation: {'⚠️ Abrupt = Suspect' if drop_80_90 > 15 else '✅ Gradual = Normal' if drop_80_90 < 10 else '⚠️ Moderat'}
 
-🧠 LOGICĂ DE DECIZIE:
-• Dacă 2+ din 3 indicatori → REAL: răspunde is_ai=false, confidence 70-95%
-• Dacă 2+ din 3 indicatori → AI: răspunde is_ai=true, confidence 70-95%
-• Dacă mixt (1-1-1): răspunde is_ai=false (default REAL), confidence 40-60%
+🧠 METODOLOGIE EVALUARE:
+• Dacă 2+ din 3 indicatori → Fotografie autentică: răspunde is_ai=false, confidence 70-95%
+• Dacă 2+ din 3 indicatori → Imagine sintetică: răspunde is_ai=true, confidence 70-95%
+• Dacă mixt (1-1-1): răspunde is_ai=false (default autentic), confidence 40-60%
 
-⚠️ CRITICAL: 
-- NU te baza DOAR pe numere! PRIVEȘTE graficul VIZUAL!
-- Dacă tail-ul arată că scade rapid → REAL (chiar dacă un indicator zice AI)
-- Dacă vezi bump clar între 60-80% → AI (chiar dacă drop e mic)
-- IMAGINILE REAL COMPRIMATE (JPEG) pot avea HF/LF mai mare - e OK!
+📋 NOTE IMPORTANTE: 
+- Analiză vizuală primordială! Numere = ghid
+- Pattern-uri naturale FFT variază cu compresie JPEG
+- Evaluare obiectivă pentru cercetare academică
 
 ⚠️ Răspunde STRICT JSON (fără markdown, fără text extra):
 {{
   "is_ai": false,
   "confidence": 75,
-  "reasoning": "Tail scade rapid după 90%, drop gradual 8 dB, fără bump → REAL",
+  "reasoning": "Descriere pattern observat și concluzie științifică",
   "indicators": ["Indicator 1", "Indicator 2", "Indicator 3"]
 }}"""
         
@@ -173,6 +174,15 @@ def interpret_radial_psd(psd1D, features_dict, api_key=None):
                 'confidence': 0,
                 'reasoning': f"❌ OpenAI a returnat răspuns gol. Model: {OPENAI_MODEL}",
                 'indicators': ["Răspuns gol de la API"]
+            }
+        
+        # Check for refusal
+        if "can't assist" in result_text.lower() or "cannot assist" in result_text.lower():
+            return {
+                'is_ai': None,
+                'confidence': 0,
+                'reasoning': "❌ OpenAI a refuzat analiza. Verifică contextul requestului.",
+                'indicators': ["API Refusal - verifică prompt context"]
             }
         
         result_text = result_text.strip()
@@ -219,22 +229,22 @@ def interpret_2d_spectrum(magnitude_2d, api_key=None):
         img_base64 = fig_to_base64(fig)
         plt.close(fig)
         
-        prompt = """Analiză FFT 2D pentru detectare AI.
+        prompt = """🎓 CONTEXT ACADEMIC: Analiză FFT 2D pentru disertație universitară despre identificarea imaginilor sintetice.
 
-GRAFIC: Heatmap 2D - centru luminos (galben/roșu).
+GRAFIC: Heatmap 2D spectru frecvență - centru luminos (galben/roșu).
 
 ⚠️ IMPORTANT CRITICAL: 
 • Linii radiale FINE din centru = NORMALE! Toate FFT-urile le au! NU înseamnă AI!
 • Doar linii groase/grilă VIZIBILĂ sau puncte izolate = AI
 
-✅ REAL:
+✅ Fotografie autentică:
 - Centru luminos circular smooth
 - Scădere lină spre margini (gradient roșu → violet → albastru)
 - Linii radiale FINE din centru = OK (pattern natural FFT)
 - Simetrie față de centru
 - Poate avea niște "zgomot" uniform în colțuri (normal JPEG)
 
-🤖 AI (DOAR dacă vezi CLAR):
+⚠️ Imagine sintetică (DOAR dacă vezi CLAR):
 - GRILĂ GROASĂ VIZIBILĂ (linii orizontale/verticale GROASE, nu fine)
 - Puncte luminoase IZOLATE departe de centru (>40% distanță, foarte clar separate)
 - Pattern X sau + FOARTE GEOMETRIC și PRONUNȚAT (nu doar linii radiale fine)
