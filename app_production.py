@@ -232,6 +232,44 @@ if uploaded_file:
             
             st.markdown("---")
             
+            st.markdown("## 📊 Verdict Final")
+            
+            verdict_col1, verdict_col2 = st.columns(2)
+            
+            with verdict_col1:
+                st.markdown("### 🔬 Verdict Matematic (FFT)")
+                st.caption("Bazat pe analiză frecvențială antrenată pe dataset-uri")
+                
+                if math_score_ai > 70:
+                    st.error(f"### {math_score_ai:.0f}% SUSPICIUNE AI")
+                    st.markdown(f"**Verdict:** {math_verdict}")
+                elif math_score_ai > 45:
+                    st.warning(f"### {math_score_ai:.0f}% SUSPICIUNE AI")
+                    st.markdown(f"**Verdict:** INCERT")
+                else:
+                    st.success(f"### {100-math_score_ai:.0f}% REAL")
+                    st.markdown(f"**Verdict:** {math_verdict}")
+                
+                suspicion = fft_patterns.get('suspicion_score', 0)
+                st.metric("Suspicion Score", f"{suspicion}/100")
+                if suspicion > 70:
+                    st.caption("⚠️ ALERT: High AI probability")
+                elif suspicion > 40:
+                    st.caption("⚠️ WARNING: Moderate suspicion")
+                else:
+                    st.caption("✅ CLEAR: Low suspicion")
+            
+            with verdict_col2:
+                if OPENAI_AVAILABLE and api_key_loaded:
+                    st.markdown("### 🤖 Verdict OpenAI (gpt-4o)")
+                    st.caption("Interpretare AI a graficelor FFT")
+                    st.info("Se va calcula după analiză grafice...")
+                else:
+                    st.markdown("### 🤖 Verdict OpenAI")
+                    st.warning("OpenAI indisponibil - verifică API Key")
+            
+            st.markdown("---")
+            
             interpretations = {}
             
             st.markdown("### 1. FFT Radial PSD")
@@ -402,58 +440,41 @@ if uploaded_file:
             st.markdown("---")
             
             if OPENAI_AVAILABLE and api_key_loaded and interpretations:
-                st.markdown("## Verdict Final OpenAI")
+                st.markdown("## 🤖 Verdict Final OpenAI")
+                st.caption("Interpretare agregată a tuturor graficelor FFT")
                 
                 with st.spinner("OpenAI agregă toate analizele..."):
                     try:
                         final = get_final_verdict(interpretations, features_dict, fft_patterns)
                         
-                        if final.get('verdict') == 'AI-GENERATED':
-                            st.error(f"# VERDICT: **{final['verdict']}**")
-                        elif final.get('verdict') == 'REAL':
-                            st.success(f"# VERDICT: **{final['verdict']}**")
-                        else:
-                            st.warning(f"# VERDICT: **{final.get('verdict', 'UNKNOWN')}**")
+                        vcol1, vcol2, vcol3 = st.columns([1, 2, 2])
                         
-                        col1, col2 = st.columns([1, 3])
-                        with col1:
+                        with vcol1:
+                            if final.get('verdict') == 'AI-GENERATED':
+                                st.error(f"### {final['verdict']}")
+                            elif final.get('verdict') == 'REAL':
+                                st.success(f"### {final['verdict']}")
+                            else:
+                                st.warning(f"### {final.get('verdict', 'UNKNOWN')}")
+                            
                             st.metric("Confidence", f"{final.get('confidence', 0):.0f}%")
-                        with col2:
-                            st.progress(final.get('confidence', 0) / 100)
                         
-                        st.markdown("### Raționament Complet:")
-                        st.write(final.get('reasoning', 'N/A'))
+                        with vcol2:
+                            if final.get('key_findings'):
+                                st.markdown("**Concluzii Cheie:**")
+                                for finding in final['key_findings'][:3]:
+                                    st.markdown(f"• {finding}")
                         
-                        if final.get('key_findings'):
-                            st.markdown("### Concluzii Cheie:")
-                            for finding in final['key_findings']:
-                                st.markdown(f"- {finding}")
+                        with vcol3:
+                            if final.get('graph_votes'):
+                                st.markdown("**Voturi Grafice:**")
+                                votes = final['graph_votes']
+                                st.caption(f"PSD: {votes.get('radial_psd', 'N/A')}")
+                                st.caption(f"2D: {votes.get('spectrum_2d', 'N/A')}")
+                                st.caption(f"Angular: {votes.get('angular_energy', 'N/A')}")
                         
-                        if final.get('graph_votes'):
-                            st.markdown("### Voturi per Grafic:")
-                            vote_col1, vote_col2, vote_col3 = st.columns(3)
-                            votes = final['graph_votes']
-                            
-                            with vote_col1:
-                                vote = votes.get('radial_psd', 'N/A')
-                                if vote == 'AI':
-                                    st.error(f"**FFT PSD:** {vote}")
-                                else:
-                                    st.success(f"**FFT PSD:** {vote}")
-                            
-                            with vote_col2:
-                                vote = votes.get('spectrum_2d', 'N/A')
-                                if vote == 'AI':
-                                    st.error(f"**Spectrum 2D:** {vote}")
-                                else:
-                                    st.success(f"**Spectrum 2D:** {vote}")
-                            
-                            with vote_col3:
-                                vote = votes.get('angular_energy', 'N/A')
-                                if vote == 'AI':
-                                    st.error(f"**Angular:** {vote}")
-                                else:
-                                    st.success(f"**Angular:** {vote}")
+                        with st.expander("📋 Raționament Complet OpenAI"):
+                            st.write(final.get('reasoning', 'N/A'))
                         
                         if final.get('recommendation'):
                             st.info(f"**Recomandare:** {final['recommendation']}")
