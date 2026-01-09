@@ -77,7 +77,7 @@ cleanup_*.py
 *_calibration.csv
 *_report.csv
 
-# Unused models (keep only face_rf_simple.pkl)
+# Unused models (keep only face_rf_simple.pkl și deepfake_phase1_best.keras)
 best_*.pkl
 final_*.pkl
 ultimate_*.pkl
@@ -85,7 +85,7 @@ metadata_*.pkl
 model_*.pkl
 face_rf_enhanced.pkl
 face_rf_model.pkl
-*.keras
+# *.keras  # Comentat pentru a permite modelul CNN
 *.h5
 
 # Result images
