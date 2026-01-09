@@ -241,7 +241,7 @@ if uploaded_file:
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
                     radial_freqs = np.arange(len(psd1D))
                     
-                    ax1.plot(radial_freqs, psd1D, linewidth=4, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
+                    ax1.plot(radial_freqs, psd1D, linewidth=2, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
                     
                     markers = [0.6, 0.7, 0.8, 0.9]
                     marker_colors = ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
