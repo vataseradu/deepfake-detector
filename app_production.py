@@ -8,10 +8,24 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import cv2
+import os
+import pickle
 
 from frequency import azimuthalAverage
 from scipy.fft import fft2, fftshift
 from scipy import ndimage
+
+# Import TensorFlow/Keras for CNN model
+try:
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+    os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+    import tensorflow as tf
+    from tensorflow import keras
+    CNN_AVAILABLE = True
+except ImportError:
+    CNN_AVAILABLE = False
+    tf = None
+    keras = None
 
 try:
     from gemini_graph_interpreter import (
@@ -35,10 +49,105 @@ st.set_page_config(
     layout="wide"
 )
 
+# Load CNN Model once at startup
+@st.cache_resource
+def load_cnn_model():
+    """Load the trained Xception CNN model"""
+    try:
+        model_path = os.path.join(os.path.dirname(__file__), 'modele', 'deepfake_phase1_best.keras')
+        if not os.path.exists(model_path):
+            return None, f"Model not found: {model_path}"
+        
+        # Recreate model architecture manually (avoid loading issues)
+        from tensorflow.keras.applications import Xception
+        from tensorflow.keras import layers, models
+        
+        # Build same architecture as training
+        base_model = Xception(
+            include_top=False,
+            weights=None,  # Will load from saved weights
+            input_shape=(256, 256, 3)  # MUST match training config!
+        )
+        
+        model = models.Sequential([
+            base_model,
+            layers.GlobalAveragePooling2D(),
+            layers.Dropout(0.5),
+            layers.Dense(1, activation='sigmoid')
+        ], name='xception_deepfake_detector')
+        
+        # Now load the weights
+        model.load_weights(model_path)
+        
+        # Compile for inference
+        model.compile(
+            optimizer='adam',
+            loss='binary_crossentropy',
+            metrics=['accuracy']
+        )
+        
+        return model, None
+        
+    except Exception as e:
+        return None, str(e)
+
+cnn_model, cnn_error = load_cnn_model() if CNN_AVAILABLE else (None, "TensorFlow not available")
+
+def predict_cnn(img_pil, model):
+    """
+    Preprocess image and predict using CNN
+    
+    Args:
+        img_pil: PIL Image
+        model: Loaded Keras model
+    
+    Returns:
+        dict: {
+            'probability_fake': float,
+            'probability_real': float,
+            'prediction': str ('REAL' or 'FAKE'),
+            'confidence': float
+        }
+    """
+    try:
+        # Preprocess image (MUST match training exactly!)
+        img_resized = img_pil.resize((256, 256))  # 256x256 as per training config
+        img_array = keras.preprocessing.image.img_to_array(img_resized)
+        img_array = np.expand_dims(img_array, axis=0)
+        # Normalize to [0, 1] (same as training: rescale=1./255)
+        img_array = img_array / 255.0
+        
+        # Predict
+        pred = model.predict(img_array, verbose=0)[0][0]
+        
+        # flow_from_directory with class_mode='binary' assigns alphabetically:
+        # fake=0 (class 0), real=1 (class 1)
+        # Model outputs: 0 = FAKE, 1 = REAL
+        prob_real = float(pred)
+        prob_fake = 1.0 - prob_real
+        
+        prediction = "REAL" if prob_real > 0.5 else "FAKE"
+        confidence = max(prob_fake, prob_real) * 100
+        
+        return {
+            'probability_fake': prob_fake,
+            'probability_real': prob_real,
+            'prediction': prediction,
+            'confidence': confidence
+        }
+    except Exception as e:
+        return {
+            'error': str(e),
+            'probability_fake': 0.5,
+            'probability_real': 0.5,
+            'prediction': 'ERROR',
+            'confidence': 0
+        }
+
 st.title("Deepfake Detector")
 st.markdown("**Tema de cercetare - VATASE Radu-Petrut**")
 st.caption("TCSI - Teoria codarii si stocarii informatiei")
-st.info("Analiza FFT (Fast Fourier Transform) antrenata pe dataset-uri de imagini reale si generate AI")
+st.info("Sistem hibrid: FFT + Random Forest + CNN Xception (74.67% accuracy, AUC 0.8273)")
 
 uploaded_file = st.file_uploader("Upload imagine", type=['jpg', 'jpeg', 'png'])
 
@@ -50,16 +159,45 @@ if uploaded_file:
         st.image(img, caption="Imagine Uploaded", width='stretch')
         st.markdown(f"**Dimensiune:** {img.size[0]} x {img.size[1]}")
         
+        # Display model status
+        st.markdown("---")
+        st.markdown("### Module disponibile:")
+        
+        # CNN Status
+        if CNN_AVAILABLE and cnn_model is not None:
+            st.success("✅ CNN Xception (Faza 1)")
+            st.caption("deepfake_phase1_best.keras")
+        elif CNN_AVAILABLE:
+            st.error("❌ CNN Model Error")
+            st.caption(cnn_error)
+        else:
+            st.warning("⚠️ TensorFlow indisponibil")
+        
+        # Random Forest Status
+        if os.path.exists('face_rf_simple.pkl'):
+            st.success("✅ Random Forest")
+        else:
+            st.warning("⚠️ Random Forest lipseste")
+        
         if OPENAI_AVAILABLE and api_key_loaded:
             model_display = OPENAI_MODEL if OPENAI_MODEL else "gpt-4o-mini"
-            st.success(f"OpenAI {model_display} Activ")
+            st.success(f"✅ OpenAI {model_display}")
             st.caption(f"API Key: {OPENAI_API_KEY[:15]}...")
         elif OPENAI_AVAILABLE:
-            st.warning("API Key OpenAI lipsește!")
+            st.warning("⚠️ API Key OpenAI lipsește")
             st.info("Pune-l în gemini_graph_interpreter.py linia 13")
+        else:
+            st.warning("⚠️ OpenAI indisponibil")
     
     if st.button("Analizează", type="primary"):
         with st.spinner("Analizez imaginea..."):
+            # ===== CNN PREDICTION FIRST (DECISIVE COMPONENT) =====
+            cnn_result = None
+            if CNN_AVAILABLE and cnn_model is not None:
+                with st.spinner("🔬 CNN Xception analysis..."):
+                    cnn_result = predict_cnn(img, cnn_model)
+            
+            # ===== FFT ANALYSIS =====
             gray = np.mean(img_array, axis=2).astype(np.float64)
             
             window = np.hanning(gray.shape[0])[:, None] * np.hanning(gray.shape[1])[None, :]
@@ -155,6 +293,53 @@ if uploaded_file:
             
             st.markdown("---")
             st.markdown("## Analiza completa:")
+            
+            # ===== PRIMARY VERDICT: CNN =====
+            st.markdown("### VERDICT PRINCIPAL - CNN Xception")
+            st.caption("*Componentă decisivă: 74.67% accuracy, AUC 0.8273 (Epoca 3, 100.000 imagini)*")
+            
+            if cnn_result and 'error' not in cnn_result:
+                cnn_col1, cnn_col2, cnn_col3 = st.columns(3)
+                
+                with cnn_col1:
+                    st.metric("Predicție CNN", cnn_result['prediction'])
+                    if cnn_result['prediction'] == 'FAKE':
+                        st.error(f"🚨 **AI-GENERATED**")
+                    else:
+                        st.success(f"✅ **REAL IMAGE**")
+                
+                with cnn_col2:
+                    st.metric("Probabilitate FAKE", f"{cnn_result['probability_fake']*100:.1f}%")
+                    st.metric("Probabilitate REAL", f"{cnn_result['probability_real']*100:.1f}%")
+                
+                with cnn_col3:
+                    st.metric("Confidence", f"{cnn_result['confidence']:.1f}%")
+                    if cnn_result['confidence'] > 80:
+                        st.caption("Certitudine Foarte Mare")
+                    elif cnn_result['confidence'] > 60:
+                        st.caption("Certitudine Mare")
+                    else:
+                        st.caption("Certitudine Moderată")
+                
+                # Visual bar
+                st.markdown("**Distribuție probabilități:**")
+                prob_fake_pct = cnn_result['probability_fake'] * 100
+                prob_real_pct = cnn_result['probability_real'] * 100
+                
+                col_bar1, col_bar2 = st.columns([prob_fake_pct/100, prob_real_pct/100])
+                with col_bar1:
+                    st.markdown(f"<div style='background-color: #FF4B4B; padding: 10px; text-align: center; color: white; font-weight: bold;'>FAKE: {prob_fake_pct:.1f}%</div>", unsafe_allow_html=True)
+                with col_bar2:
+                    st.markdown(f"<div style='background-color: #00CC66; padding: 10px; text-align: center; color: white; font-weight: bold;'>REAL: {prob_real_pct:.1f}%</div>", unsafe_allow_html=True)
+            
+            elif cnn_result and 'error' in cnn_result:
+                st.error(f"Eroare CNN: {cnn_result['error']}")
+            else:
+                st.warning("⚠️ CNN indisponibil - vezi sidebar pentru detalii")
+            
+            st.markdown("---")
+            st.markdown("### 📊 Analiză Comparativă (FFT + Random Forest)")
+            st.caption("*Metode complementare pentru validare educațională*")
             
             st.markdown("### VERDICT PRINCIPAL")
             
@@ -433,7 +618,7 @@ if uploaded_file:
             
             if OPENAI_AVAILABLE and api_key_loaded and interpretations:
                 st.markdown("---")
-                st.markdown("## 🤖 Verdict final OpenAI GPT-4o")
+                st.markdown("## Verdict OpenAI GPT-4o")
                 st.caption("*Sinteza analizei FFT + grafice suplimentare (color, gradient, noise)*")
                 
                 with st.spinner("⏳ GPT-4o agrega toate datele..."):

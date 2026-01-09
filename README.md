@@ -9,7 +9,7 @@ Advanced deepfake detection system using FFT (Fast Fourier Transform) analysis c
 
 ### Live Demo
 
-**Try the application here:** [Streamlit Cloud Link](will-be-updated-after-deployment)
+**Try the application here:** [Streamlit Cloud Link](https://deepfake-detector-tcsivtstcsitcsi.streamlit.app/)
 
 ## Features
 
@@ -23,7 +23,7 @@ Advanced deepfake detection system using FFT (Fast Fourier Transform) analysis c
 
 ### Quick Start (Recommended)
 
-**Access the live application:** [Streamlit Cloud - Deepfake Detector](https://vataseradu-deepfake-detector.streamlit.app)
+**Access the live application:** [Streamlit Cloud - Deepfake Detector](https://deepfake-detector-tcsivtstcsitcsi.streamlit.app/)
 
 No installation needed - works directly in browser!
 
