@@ -279,53 +279,57 @@ if uploaded_file:
             
             if psd1D is not None:
                 with st.expander("Afiseaza grafic FFT Radial PSD", expanded=False):
+                    # Grafic CURAT fara label-uri pentru a nu induce AI in eroare
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
                     radial_freqs = np.arange(len(psd1D))
                     
-                    ax1.plot(radial_freqs, psd1D, linewidth=2, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
-                    
-                    markers = [0.6, 0.7, 0.8, 0.9]
-                    marker_colors = ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
-                    marker_labels = ['60%', '70%', '80%', '90%']
-                    
-                    for pct, color, label in zip(markers, marker_colors, marker_labels):
-                        idx = int(pct * len(psd1D))
-                        value = psd1D[idx]
-                        
-                        ax1.axvline(x=idx, color=color, linestyle='--', alpha=0.7, linewidth=2.5, zorder=2)
-                        
-                        ax1.text(idx, ax1.get_ylim()[1]*0.97, label, 
-                                color=color, fontweight='bold', ha='center', fontsize=14,
-                                bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor=color, linewidth=2, alpha=0.9))
-                        
-                        ax1.text(idx, value + 2, f'{value:.1f} dB', 
-                                color='black', fontweight='bold', ha='center', fontsize=12,
-                                bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7, edgecolor='black', linewidth=1.5))
+                    # Plot simplu fara adnotari
+                    ax1.plot(radial_freqs, psd1D, linewidth=2, color='#2E86AB', alpha=0.95)
                     
                     start_idx = int(0.05 * len(psd1D))
                     ax1.set_xlim(start_idx, len(psd1D))
                     
-                    ax1.set_xlabel('Radial Frequency (pixels)', fontsize=14, fontweight='bold')
-                    ax1.set_ylabel('Power (dB)', fontsize=14, fontweight='bold')
-                    ax1.set_title('FFT Radial PSD - Frequency Analysis', fontsize=15, fontweight='bold')
-                    ax1.grid(True, alpha=0.4, linestyle=':')
-                    ax1.legend(loc='upper right', fontsize=10)
+                    ax1.set_xlabel('Radial Frequency', fontsize=12)
+                    ax1.set_ylabel('Power (dB)', fontsize=12)
+                    ax1.set_title('FFT Radial PSD', fontsize=13)
+                    ax1.grid(True, alpha=0.3, linestyle=':')
                     
                     st.pyplot(fig1)
                     plt.close(fig1)
+                    
+                    # Numerele ca text pentru prompt AI
+                    psd_len = len(psd1D)
+                    val_60 = psd1D[int(0.6 * psd_len)] if psd_len > 50 else 0
+                    val_70 = psd1D[int(0.7 * psd_len)] if psd_len > 50 else 0
+                    val_80 = psd1D[int(0.8 * psd_len)] if psd_len > 50 else 0
+                    val_90 = psd1D[int(0.9 * psd_len)] if psd_len > 50 else 0
+                    
+                    st.caption(f"📊 Valori PSD: 60%={val_60:.1f}dB, 70%={val_70:.1f}dB, 80%={val_80:.1f}dB, 90%={val_90:.1f}dB")
                 
                 if OPENAI_AVAILABLE and api_key_loaded:
                     with st.spinner("Analyzing FFT with OpenAI..."):
                         try:
-                            result = interpret_radial_psd(psd1D, features_dict, api_key=OPENAI_API_KEY)
+                            # Trimite valorile numerice ca text
+                            psd_text_values = {
+                                'val_60': float(val_60),
+                                'val_70': float(val_70),
+                                'val_80': float(val_80),
+                                'val_90': float(val_90)
+                            }
+                            result = interpret_radial_psd(psd1D, features_dict, psd_text_values, api_key=OPENAI_API_KEY)
                             interpretations['radial_psd'] = result
                             
+                            # Fix: Foloseste correct confidence
                             ai_confidence = result.get('confidence', 50)
                             ai_is_ai = result.get('is_ai', None)
+                            
+                            # ai_confidence = cat de sigur e AI
+                            # Daca is_ai=True -> ai_score = confidence (% ca e AI)
+                            # Daca is_ai=False -> ai_score = 100-confidence (% ca e REAL inversat)
                             if ai_is_ai is True:
-                                ai_score = ai_confidence
+                                ai_score = ai_confidence  # Ex: 75% confidence ca e AI -> 75% AI score
                             elif ai_is_ai is False:
-                                ai_score = 100 - ai_confidence
+                                ai_score = 100 - ai_confidence  # Ex: 80% confidence ca e REAL -> 20% AI score
                             else:
                                 ai_score = 50
                             
@@ -472,9 +476,8 @@ if uploaded_file:
                             if final.get('graph_votes'):
                                 st.markdown("**Voturi Grafice:**")
                                 votes = final['graph_votes']
-                                st.caption(f"PSD: {votes.get('radial_psd', 'N/A')}")
-                                st.caption(f"2D: {votes.get('spectrum_2d', 'N/A')}")
-                                st.caption(f"Angular: {votes.get('angular_energy', 'N/A')}")
+                                st.caption(f"📊 PSD Radial: {votes.get('radial_psd', 'N/A')}")
+                                st.caption(f"🎨 Spectrum 2D: {votes.get('spectrum_2d', 'N/A')}")
                         
                         with st.expander("📋 Raționament Complet OpenAI"):
                             st.write(final.get('reasoning', 'N/A'))
@@ -484,6 +487,172 @@ if uploaded_file:
                         st.error(f"Eroare verdict final: {str(e)}")
                         import traceback
                         st.code(traceback.format_exc())
+            
+            st.markdown("---")
+            st.markdown("## 📊 Analize Suplimentare")
+            
+            # 3. Color Histogram
+            with st.expander("🌈 Color Histogram - Distributie Canale RGB"):
+                fig3, ax3 = plt.subplots(figsize=(12, 6))
+                colors = ('r', 'g', 'b')
+                for i, color in enumerate(colors):
+                    histogram, bin_edges = np.histogram(img_array[:, :, i], bins=256, range=(0, 256))
+                    ax3.plot(bin_edges[0:-1], histogram, color=color, alpha=0.7, linewidth=2, label=f'{color.upper()} channel')
+                
+                ax3.set_xlabel('Pixel Value', fontsize=12)
+                ax3.set_ylabel('Frequency', fontsize=12)
+                ax3.set_title('RGB Color Distribution', fontsize=13)
+                ax3.legend()
+                ax3.grid(True, alpha=0.3)
+                st.pyplot(fig3)
+                plt.close(fig3)
+                
+                # Analiza simpla
+                r_std = np.std(img_array[:, :, 0])
+                g_std = np.std(img_array[:, :, 1])
+                b_std = np.std(img_array[:, :, 2])
+                st.caption(f"📌 Std Dev: R={r_std:.2f}, G={g_std:.2f}, B={b_std:.2f}")
+                if abs(r_std - g_std) < 5 and abs(g_std - b_std) < 5:
+                    st.info("✅ Distribuție naturală - canale echilibrate")
+                else:
+                    st.warning("⚠️ Distribuție neuniformă - posibilă procesare artificială")
+            
+            # 4. Gradient Magnitude Map
+            with st.expander("📐 Gradient Magnitude - Harta de Detalii"):
+                gray_img = np.mean(img_array, axis=2).astype(np.float32)
+                
+                # Sobel gradients
+                grad_x = cv2.Sobel(gray_img, cv2.CV_32F, 1, 0, ksize=3)
+                grad_y = cv2.Sobel(gray_img, cv2.CV_32F, 0, 1, ksize=3)
+                grad_magnitude = np.sqrt(grad_x**2 + grad_y**2)
+                
+                fig4, (ax4a, ax4b) = plt.subplots(1, 2, figsize=(14, 6))
+                
+                ax4a.imshow(grad_magnitude, cmap='hot')
+                ax4a.set_title('Gradient Magnitude', fontsize=13)
+                ax4a.axis('off')
+                
+                # Histogram of gradients
+                ax4b.hist(grad_magnitude.flatten(), bins=100, color='coral', alpha=0.7)
+                ax4b.set_xlabel('Gradient Magnitude', fontsize=12)
+                ax4b.set_ylabel('Frequency', fontsize=12)
+                ax4b.set_title('Gradient Distribution', fontsize=13)
+                ax4b.grid(True, alpha=0.3)
+                
+                st.pyplot(fig4)
+                plt.close(fig4)
+                
+                mean_grad = np.mean(grad_magnitude)
+                std_grad = np.std(grad_magnitude)
+                st.caption(f"📌 Mean Gradient: {mean_grad:.2f}, Std: {std_grad:.2f}")
+                if std_grad < 15:
+                    st.warning("⚠️ Gradient foarte uniform - posibil AI smoothing")
+                else:
+                    st.info("✅ Gradient variat - texturi naturale")
+            
+            # 5. Noise Pattern Analysis
+            with st.expander("🔍 Noise Pattern - Analiza Zgomotului"):
+                # High-pass filter pentru noise
+                gray_img = np.mean(img_array, axis=2).astype(np.float32)
+                blurred = cv2.GaussianBlur(gray_img, (5, 5), 0)
+                noise = gray_img - blurred
+                
+                fig5, (ax5a, ax5b) = plt.subplots(1, 2, figsize=(14, 6))
+                
+                im5a = ax5a.imshow(noise, cmap='gray', vmin=-30, vmax=30)
+                ax5a.set_title('Noise Pattern', fontsize=13)
+                ax5a.axis('off')
+                plt.colorbar(im5a, ax=ax5a, fraction=0.046, pad=0.04)
+                
+                # Noise histogram
+                ax5b.hist(noise.flatten(), bins=100, color='steelblue', alpha=0.7)
+                ax5b.set_xlabel('Noise Value', fontsize=12)
+                ax5b.set_ylabel('Frequency', fontsize=12)
+                ax5b.set_title('Noise Distribution', fontsize=13)
+                ax5b.grid(True, alpha=0.3)
+                
+                st.pyplot(fig5)
+                plt.close(fig5)
+                
+                noise_std = np.std(noise)
+                st.caption(f"📌 Noise Std Dev: {noise_std:.2f}")
+                if noise_std < 5:
+                    st.warning("⚠️ Zgomot foarte mic - posibilă prelucrare AI (denoising)")
+                elif noise_std > 20:
+                    st.warning("⚠️ Zgomot foarte mare - posibil artifact compresie")
+                else:
+                    st.info("✅ Zgomot natural - nivel acceptabil")
+            
+            # 6. EXIF Metadata
+            st.markdown("---")
+            st.markdown("## 📷 EXIF Metadata")
+            
+            try:
+                from PIL.ExifTags import TAGS
+                
+                exif_data = img.getexif()
+                
+                if exif_data:
+                    st.success("✅ Metadata EXIF găsită")
+                    
+                    exif_dict = {}
+                    for tag_id, value in exif_data.items():
+                        tag = TAGS.get(tag_id, tag_id)
+                        exif_dict[tag] = str(value)
+                    
+                    with st.expander("📋 Detalii EXIF Complete"):
+                        for key, value in exif_dict.items():
+                            st.text(f"{key}: {value}")
+                    
+                    # Key indicators
+                    meta_col1, meta_col2, meta_col3 = st.columns(3)
+                    
+                    with meta_col1:
+                        if 'Make' in exif_dict or 'Model' in exif_dict:
+                            st.metric("Camera", exif_dict.get('Model', exif_dict.get('Make', 'N/A')))
+                        else:
+                            st.warning("⚠️ Lipsă info camera")
+                            st.caption("AI images rar au metadata camera")
+                    
+                    with meta_col2:
+                        if 'Software' in exif_dict:
+                            software = exif_dict['Software']
+                            st.metric("Software", software[:30])
+                            if any(ai_tool in software.lower() for ai_tool in ['stable', 'midjourney', 'dalle', 'photoshop', 'generate']):
+                                st.error("🚨 AI generation tool detectat!")
+                        else:
+                            st.info("Software: N/A")
+                    
+                    with meta_col3:
+                        if 'DateTime' in exif_dict:
+                            st.metric("Date", exif_dict['DateTime'][:10])
+                        else:
+                            st.info("Date: N/A")
+                    
+                    # AI indicators
+                    ai_indicators = []
+                    if 'Make' not in exif_dict and 'Model' not in exif_dict:
+                        ai_indicators.append("❌ Lipsă metadata camera (suspect)")
+                    if 'Software' in exif_dict:
+                        if any(tool in exif_dict['Software'].lower() for tool in ['ai', 'generate', 'stable', 'midjourney']):
+                            ai_indicators.append("🚨 Software AI detectat")
+                    if not exif_data or len(exif_data) < 5:
+                        ai_indicators.append("⚠️ EXIF minimal (posibil sters sau generat)")
+                    
+                    if ai_indicators:
+                        st.warning("**Indicatori Suspicioși:**")
+                        for indicator in ai_indicators:
+                            st.caption(indicator)
+                    else:
+                        st.success("✅ Metadata completa - nicio alerta")
+                
+                else:
+                    st.error("❌ Nicio metadata EXIF")
+                    st.caption("⚠️ Imaginile AI generate rar contin EXIF data")
+                    st.caption("⚠️ Sau metadata a fost stearsa intențional")
+            
+            except Exception as e:
+                st.warning(f"Nu s-a putut citi EXIF: {str(e)}")
 
 else:
     st.info("Încarcă o imagine pentru a începe analiza")

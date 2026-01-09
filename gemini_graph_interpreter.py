@@ -37,9 +37,16 @@ def fig_to_base64(fig):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode('utf-8')
 
-def interpret_radial_psd(psd1D, features_dict, api_key=None):
+def interpret_radial_psd(psd1D, features_dict, psd_text_values=None, api_key=None):
     """
     Interpretează graficul Radial PSD
+    
+    Parameters:
+    -----------
+    psd1D: array - Power spectral density 1D
+    features_dict: dict - Feature dictionary
+    psd_text_values: dict - Valori numerice exacte (60%, 70%, 80%, 90%)
+    api_key: str - OpenAI API key
     
     Returns:
     --------
@@ -53,34 +60,28 @@ def interpret_radial_psd(psd1D, features_dict, api_key=None):
     try:
         client = get_openai_client(api_key)
         
-        # Creează graficul
+        # Creează graficul CURAT fara label-uri
         fig, ax = plt.subplots(figsize=(10, 6))
         radial_freqs = np.arange(len(psd1D))
-        ax.plot(radial_freqs, psd1D, linewidth=2, color='#2E86AB', label='Radial PSD')
+        ax.plot(radial_freqs, psd1D, linewidth=2, color='#2E86AB')
         
-        # Trend line
-        if len(psd1D) > 50:
-            mid_idx = len(psd1D) // 2
-            x_ref = radial_freqs[mid_idx:]
-            y_ref = psd1D[mid_idx:]
-            valid = np.isfinite(y_ref)
-            if np.sum(valid) > 10:
-                coeffs = np.polyfit(x_ref[valid], y_ref[valid], 1)
-                ax.plot(x_ref, np.polyval(coeffs, x_ref), 'r--', linewidth=2, 
-                       label=f'Decay: {coeffs[0]:.2f} dB/px', alpha=0.7)
-        
-        ax.set_xlabel('Radial Frequency (pixels)', fontweight='bold')
+        ax.set_xlabel('Radial Frequency', fontweight='bold')
         ax.set_ylabel('Power (dB)', fontweight='bold')
         ax.set_title('Radial PSD Analysis', fontweight='bold')
         ax.grid(True, alpha=0.3)
-        ax.legend()
         
         # Calculează valorile exacte la punctele cheie pentru prompt
         psd_len = len(psd1D)
-        val_60 = float(psd1D[int(0.6 * psd_len)]) if psd_len > 50 else 0
-        val_70 = float(psd1D[int(0.7 * psd_len)]) if psd_len > 50 else 0
-        val_80 = float(psd1D[int(0.8 * psd_len)]) if psd_len > 50 else 0
-        val_90 = float(psd1D[int(0.9 * psd_len)]) if psd_len > 50 else 0
+        if psd_text_values:
+            val_60 = psd_text_values['val_60']
+            val_70 = psd_text_values['val_70']
+            val_80 = psd_text_values['val_80']
+            val_90 = psd_text_values['val_90']
+        else:
+            val_60 = float(psd1D[int(0.6 * psd_len)]) if psd_len > 50 else 0
+            val_70 = float(psd1D[int(0.7 * psd_len)]) if psd_len > 50 else 0
+            val_80 = float(psd1D[int(0.8 * psd_len)]) if psd_len > 50 else 0
+            val_90 = float(psd1D[int(0.9 * psd_len)]) if psd_len > 50 else 0
         
         # Calculează diferențele între puncte pentru a detecta drop-uri
         drop_60_70 = val_60 - val_70
