@@ -239,39 +239,39 @@ if uploaded_file:
             if psd1D is not None:
                 with st.expander("📈 Afișează grafic FFT Radial PSD", expanded=False):
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
-                radial_freqs = np.arange(len(psd1D))
-                
-                ax1.plot(radial_freqs, psd1D, linewidth=4, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
-                
-                markers = [0.6, 0.7, 0.8, 0.9]
-                marker_colors = ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
-                marker_labels = ['60%', '70%', '80%', '90%']
-                
-                for pct, color, label in zip(markers, marker_colors, marker_labels):
-                    idx = int(pct * len(psd1D))
-                    value = psd1D[idx]
+                    radial_freqs = np.arange(len(psd1D))
                     
-                    ax1.axvline(x=idx, color=color, linestyle='--', alpha=0.7, linewidth=2.5, zorder=2)
+                    ax1.plot(radial_freqs, psd1D, linewidth=4, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
                     
-                    ax1.text(idx, ax1.get_ylim()[1]*0.97, label, 
-                            color=color, fontweight='bold', ha='center', fontsize=14,
-                            bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor=color, linewidth=2, alpha=0.9))
+                    markers = [0.6, 0.7, 0.8, 0.9]
+                    marker_colors = ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
+                    marker_labels = ['60%', '70%', '80%', '90%']
                     
-                    ax1.text(idx, value + 2, f'{value:.1f} dB', 
-                            color='black', fontweight='bold', ha='center', fontsize=12,
-                            bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7, edgecolor='black', linewidth=1.5))
-                
-                start_idx = int(0.05 * len(psd1D))
-                ax1.set_xlim(start_idx, len(psd1D))
-                
-                ax1.set_xlabel('Radial Frequency (pixels)', fontsize=14, fontweight='bold')
-                ax1.set_ylabel('Power (dB)', fontsize=14, fontweight='bold')
-                ax1.set_title('FFT Radial PSD - Frequency Analysis', fontsize=15, fontweight='bold')
-                ax1.grid(True, alpha=0.4, linestyle=':')
-                ax1.legend(loc='upper right', fontsize=10)
-                
-                st.pyplot(fig1)
-                plt.close(fig1)
+                    for pct, color, label in zip(markers, marker_colors, marker_labels):
+                        idx = int(pct * len(psd1D))
+                        value = psd1D[idx]
+                        
+                        ax1.axvline(x=idx, color=color, linestyle='--', alpha=0.7, linewidth=2.5, zorder=2)
+                        
+                        ax1.text(idx, ax1.get_ylim()[1]*0.97, label, 
+                                color=color, fontweight='bold', ha='center', fontsize=14,
+                                bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor=color, linewidth=2, alpha=0.9))
+                        
+                        ax1.text(idx, value + 2, f'{value:.1f} dB', 
+                                color='black', fontweight='bold', ha='center', fontsize=12,
+                                bbox=dict(boxstyle='round,pad=0.3', facecolor=color, alpha=0.7, edgecolor='black', linewidth=1.5))
+                    
+                    start_idx = int(0.05 * len(psd1D))
+                    ax1.set_xlim(start_idx, len(psd1D))
+                    
+                    ax1.set_xlabel('Radial Frequency (pixels)', fontsize=14, fontweight='bold')
+                    ax1.set_ylabel('Power (dB)', fontsize=14, fontweight='bold')
+                    ax1.set_title('FFT Radial PSD - Frequency Analysis', fontsize=15, fontweight='bold')
+                    ax1.grid(True, alpha=0.4, linestyle=':')
+                    ax1.legend(loc='upper right', fontsize=10)
+                    
+                    st.pyplot(fig1)
+                    plt.close(fig1)
                 
                 if OPENAI_AVAILABLE and api_key_loaded:
                     with st.spinner("Analyzing FFT with OpenAI..."):
