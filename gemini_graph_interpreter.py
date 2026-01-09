@@ -490,7 +490,23 @@ Răspunde în format JSON:
         )
         
         result_text = response.choices[0].message.content
-        result_json = json.loads(result_text)
+        
+        if not result_text or result_text.strip() == "":
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"Răspuns gol de la OpenAI", 'indicators': []}
+        
+        result_text = result_text.strip()
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        elif result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+        result_text = result_text.strip()
+        
+        try:
+            result_json = json.loads(result_text)
+        except json.JSONDecodeError as e:
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"JSON error: {str(e)}. Text: '{result_text[:100]}'...", 'indicators': []}
         
         return {
             'is_ai': result_json.get('is_ai', False),
@@ -578,7 +594,23 @@ Răspunde în format JSON:
         )
         
         result_text = response.choices[0].message.content
-        result_json = json.loads(result_text)
+        
+        if not result_text or result_text.strip() == "":
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"Răspuns gol de la OpenAI", 'indicators': []}
+        
+        result_text = result_text.strip()
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        elif result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+        result_text = result_text.strip()
+        
+        try:
+            result_json = json.loads(result_text)
+        except json.JSONDecodeError as e:
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"JSON error: {str(e)}. Text: '{result_text[:100]}'...", 'indicators': []}
         
         return {
             'is_ai': result_json.get('is_ai', False),
@@ -664,7 +696,23 @@ Răspunde în format JSON:
         )
         
         result_text = response.choices[0].message.content
-        result_json = json.loads(result_text)
+        
+        if not result_text or result_text.strip() == "":
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"Răspuns gol de la OpenAI", 'indicators': []}
+        
+        result_text = result_text.strip()
+        if result_text.startswith("```json"):
+            result_text = result_text[7:]
+        elif result_text.startswith("```"):
+            result_text = result_text[3:]
+        if result_text.endswith("```"):
+            result_text = result_text[:-3]
+        result_text = result_text.strip()
+        
+        try:
+            result_json = json.loads(result_text)
+        except json.JSONDecodeError as e:
+            return {'is_ai': False, 'confidence': 50, 'reasoning': f"JSON error: {str(e)}. Text: '{result_text[:100]}'...", 'indicators': []}
         
         return {
             'is_ai': result_json.get('is_ai', False),
