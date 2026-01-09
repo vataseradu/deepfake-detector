@@ -37,6 +37,8 @@ st.set_page_config(
 
 st.title("Deepfake Detector")
 st.markdown("**Tema de cercetare - VATASE Radu-Petrut**")
+st.caption("🎓 TCSI - Teoria codarii si stocarii informatiei")
+st.caption("TCSI - Teoria codarii si stocarii informatiei")
 
 uploaded_file = st.file_uploader("Upload imagine", type=['jpg', 'jpeg', 'png'])
 
@@ -52,11 +54,6 @@ if uploaded_file:
             model_display = OPENAI_MODEL if OPENAI_MODEL else "gpt-4o-mini"
             st.success(f"OpenAI {model_display} Activ")
             st.caption(f"API Key: {OPENAI_API_KEY[:15]}...")
-            
-            if model_display == "gpt-4o":
-                st.info("**Model Premium**: Precizie maximă, ~$0.025/imagine")
-            else:
-                st.info("**Model Economic**: ~$0.003/imagine")
         elif OPENAI_AVAILABLE:
             st.warning("API Key OpenAI lipsește!")
             st.info("Pune-l în gemini_graph_interpreter.py linia 13")
@@ -240,7 +237,8 @@ if uploaded_file:
             st.markdown("### 1. FFT Radial PSD")
             
             if psd1D is not None:
-                fig1, ax1 = plt.subplots(figsize=(20, 11))
+                with st.expander("📈 Afișează grafic FFT Radial PSD", expanded=False):
+                    fig1, ax1 = plt.subplots(figsize=(12, 6))
                 radial_freqs = np.arange(len(psd1D))
                 
                 ax1.plot(radial_freqs, psd1D, linewidth=4, color='#2E86AB', alpha=0.95, label='PSD Curve', zorder=3)
@@ -269,11 +267,11 @@ if uploaded_file:
                 ax1.set_xlabel('Radial Frequency (pixels)', fontsize=14, fontweight='bold')
                 ax1.set_ylabel('Power (dB)', fontsize=14, fontweight='bold')
                 ax1.set_title('FFT Radial PSD - Frequency Analysis', fontsize=15, fontweight='bold')
-                ax1.grid(True, alpha=0.4, linestyle=':')
-                ax1.legend(loc='upper right', fontsize=10)
-                
-                st.pyplot(fig1)
-                plt.close(fig1)
+                    ax1.grid(True, alpha=0.4, linestyle=':')
+                    ax1.legend(loc='upper right', fontsize=10)
+                    
+                    st.pyplot(fig1)
+                    plt.close(fig1)
                 
                 if OPENAI_AVAILABLE and api_key_loaded:
                     with st.spinner("Analyzing FFT with OpenAI..."):
@@ -369,14 +367,15 @@ if uploaded_file:
             st.markdown("### 2. Spectru 2D FFT")
             
             if magnitude_2d is not None:
-                fig2, ax2 = plt.subplots(figsize=(14, 14))
-                im = ax2.imshow(magnitude_2d, cmap='hot', aspect='auto')
-                ax2.set_title('FFT 2D Spectrum', fontsize=15, fontweight='bold')
-                plt.colorbar(im, ax=ax2, label='Log Power', fraction=0.046, pad=0.04)
-                ax2.grid(True, alpha=0.2, color='cyan', linestyle=':', linewidth=0.5)
-                
-                st.pyplot(fig2)
-                plt.close(fig2)
+                with st.expander("📈 Afișează grafic Spectru 2D FFT", expanded=False):
+                    fig2, ax2 = plt.subplots(figsize=(10, 10))
+                    im = ax2.imshow(magnitude_2d, cmap='hot', aspect='auto')
+                    ax2.set_title('FFT 2D Spectrum', fontsize=15, fontweight='bold')
+                    plt.colorbar(im, ax=ax2, label='Log Power', fraction=0.046, pad=0.04)
+                    ax2.grid(True, alpha=0.2, color='cyan', linestyle=':', linewidth=0.5)
+                    
+                    st.pyplot(fig2)
+                    plt.close(fig2)
                 
                 if OPENAI_AVAILABLE and api_key_loaded:
                     with st.spinner("Analyzing 2D spectrum..."):
