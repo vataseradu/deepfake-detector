@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 import pickle
 
-DATASET_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE"
+DATASET_PATH = r/path/to/dataset
 FAKE_PATH = os.path.join(DATASET_PATH, "training_fake")
 REAL_PATH = os.path.join(DATASET_PATH, "training_real")
 

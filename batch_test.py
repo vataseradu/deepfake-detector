@@ -15,8 +15,8 @@ import pickle
 with open('face_rf_simple.pkl', 'rb') as f:
     rf_model = pickle.load(f)
 
-FAKE_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_fake"
-REAL_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_real"
+FAKE_PATH = r"/path/to/dataset/training_fake"  # TODO: Set your path (see SETUP_LOCAL.md)
+REAL_PATH = r"/path/to/dataset/training_real"  # TODO: Set your path (see SETUP_LOCAL.md)
 
 def analyze_image(img_path):
     img = Image.open(img_path).convert('RGB')

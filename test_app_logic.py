@@ -14,7 +14,7 @@ import pickle
 with open('face_rf_model.pkl', 'rb') as f:
     rf_model = pickle.load(f)
 
-REAL_IMAGE = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_real\real_00001.jpg"
+REAL_IMAGE = r"/path/to/dataset/training_real/sample.jpg"  # TODO: Set your path
 
 img = Image.open(REAL_IMAGE).convert('RGB')
 img_array = np.array(img)

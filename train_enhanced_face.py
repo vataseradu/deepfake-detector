@@ -16,8 +16,8 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import pickle
 from tqdm import tqdm
 
-FAKE_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_fake"
-REAL_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_real"
+FAKE_PATH = r"/path/to/dataset/training_fake"  # TODO: Set your path (see SETUP_LOCAL.md)
+REAL_PATH = r"/path/to/dataset/training_real"  # TODO: Set your path (see SETUP_LOCAL.md)
 
 def extract_enhanced_features(img_path):
     """Extract 10 features (original 5 + 5 new)"""

@@ -225,7 +225,7 @@ def analyze_image(file_info):
 
 def main():
     # === CONFIGURARE ===
-    BASE_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE"
+    BASE_PATH = r/path/to/dataset
     REAL_PATH = os.path.join(BASE_PATH, "training_real") 
     FAKE_PATH = os.path.join(BASE_PATH, "training_fake")
     

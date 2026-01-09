@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -8,15 +9,63 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Virtual environments
 .venv/
 venv/
 ENV/
 env/
+
+# Environment variables & secrets
 .env
+.env.local
+*.key
+*_key.txt
+secrets.json
+config.json
+
+# Logs & databases
 *.log
-.DS_Store
 *.sqlite
 *.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Training data & test images
 imagini/
 test_calibrare/
+*.jpg
+*.jpeg
+*.png
+!*.png
+# Allow documentation images
+!*results*.png
+!*plot*.png
+!*importances*.png
+
+# Jupyter
 .ipynb_checkpoints/
+
+# Models (large files - optional, uncomment if too big)
+# *.pkl
+# *.keras
+# *.h5
+
+# CSV data files with results
+*_calibration.csv
+*_report.csv
+*_features.csv
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+

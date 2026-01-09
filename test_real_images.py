@@ -9,7 +9,7 @@ import cv2
 from scipy.fft import fft2, fftshift
 from frequency import azimuthalAverage
 
-REAL_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE\training_real"
+REAL_PATH = r"/path/to/dataset/training_real"  # TODO: Set your path (see SETUP_LOCAL.md)
 
 def analyze_image(img_path):
     img = Image.open(img_path).convert('RGB')

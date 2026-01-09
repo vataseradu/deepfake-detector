@@ -180,7 +180,7 @@ def main():
     print("="*80)
     
     # Load data
-    BASE_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE"
+    BASE_PATH = r/path/to/dataset
     REAL_PATH = os.path.join(BASE_PATH, "training_real") 
     FAKE_PATH = os.path.join(BASE_PATH, "training_fake")
     

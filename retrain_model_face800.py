@@ -4,7 +4,7 @@ RETRAINING SCRIPT - Face 800x800 Dataset
 Reantrenează modelul ML pe dataset-ul High-Res FACE (800x800px)
 cu toate feature-urile forensice optimizate
 
-Dataset: C:/Users/Vatase Radu/Downloads/datetrainingFACE/
+Dataset: /path/to/dataset/
   - training_real: 1081 imagini
   - training_fake: 960 imagini
   - Total: 2041 imagini (balansat ~53-47%)
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     print("="*70)
     
     # Dataset paths
-    BASE_PATH = "C:/Users/Vatase Radu/Downloads/datetrainingFACE"
+    BASE_PATH = "/path/to/dataset"
     REAL_PATH = os.path.join(BASE_PATH, "training_real")
     FAKE_PATH = os.path.join(BASE_PATH, "training_fake")
     

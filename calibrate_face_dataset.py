@@ -13,7 +13,7 @@ import pandas as pd
 from tqdm import tqdm
 
 # Paths
-DATASET_PATH = r"C:\Users\Vatase Radu\Downloads\datetrainingFACE"
+DATASET_PATH = r/path/to/dataset
 FAKE_PATH = os.path.join(DATASET_PATH, "training_fake")
 REAL_PATH = os.path.join(DATASET_PATH, "training_real")
 

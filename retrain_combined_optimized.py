@@ -173,7 +173,7 @@ if __name__ == "__main__":
     print("="*70)
     
     # === Dataset 1: Face 800x800 ===
-    FACE_PATH = "C:/Users/Vatase Radu/Downloads/datetrainingFACE"
+    FACE_PATH = "/path/to/dataset"
     face_real = glob.glob(os.path.join(FACE_PATH, "training_real", "*.*"))
     face_fake = glob.glob(os.path.join(FACE_PATH, "training_fake", "*.*"))
     
