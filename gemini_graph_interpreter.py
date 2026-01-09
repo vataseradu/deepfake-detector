@@ -11,7 +11,10 @@ import os
 
 try:
     import streamlit as st
-    OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY", ""))
+    if "OPENAI_API_KEY" in st.secrets:
+        OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+    else:
+        OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 except:
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
