@@ -45,27 +45,59 @@ test_calibrare/
 *.jpg
 *.jpeg
 *.png
-!*.png
-# Allow documentation images
-!*results*.png
-!*plot*.png
-!*importances*.png
 
 # Jupyter
 .ipynb_checkpoints/
 
-# Models (large files - optional, uncomment if too big)
-# *.pkl
-# *.keras
-# *.h5
+# Documentation (keep only README.md)
+*_GUIDE.md
+*_REPORT.md
+*_SUMMARY.md
+*_NOTES.md
+QUICKSTART.md
+SETUP*.md
+TESTING*.md
+SECURITY*.md
 
-# CSV data files with results
+# Training/Testing scripts (not needed in production)
+train_*.py
+test_*.py
+batch_*.py
+calibrate_*.py
+retrain_*.py
+*_detection.py
+*_forensics.py
+*_analysis.py
+*_hybrid.py
+clean_*.py
+cleanup_*.py
+
+# Data files
+*_features.csv
 *_calibration.csv
 *_report.csv
-*_features.csv
+
+# Unused models (keep only face_rf_simple.pkl)
+best_*.pkl
+final_*.pkl
+ultimate_*.pkl
+metadata_*.pkl
+model_*.pkl
+face_rf_enhanced.pkl
+face_rf_model.pkl
+*.keras
+*.h5
+
+# Result images
+*_results.png
+*_plot.png
+*_importances.png
+*_validation.png
 
 # Temporary files
 *.tmp
 *.bak
 *.swp
+cleanup_repository.py
+
 
