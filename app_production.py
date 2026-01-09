@@ -38,7 +38,7 @@ st.set_page_config(
 st.title("Deepfake Detector")
 st.markdown("**Tema de cercetare - VATASE Radu-Petrut**")
 st.caption("TCSI - Teoria codarii si stocarii informatiei")
-st.info("Metoda: Analiza FFT (Fast Fourier Transform) antrenata pe dataset-uri de imagini reale si generate AI")
+st.info("Analiza FFT (Fast Fourier Transform) antrenata pe dataset-uri de imagini reale si generate AI")
 
 uploaded_file = st.file_uploader("Upload imagine", type=['jpg', 'jpeg', 'png'])
 
@@ -154,14 +154,14 @@ if uploaded_file:
             }
             
             st.markdown("---")
-            st.markdown("## Analiza completa: Matematica + AI")
+            st.markdown("## Analiza completa:")
             
-            st.markdown("### 🎯 VERDICT PRINCIPAL")
+            st.markdown("### VERDICT PRINCIPAL")
             
             verdict_col1, verdict_col2 = st.columns(2)
             
             with verdict_col1:
-                st.markdown("#### Scor Matematic (Random Forest)")
+                st.markdown("#### Scor Matematic")
                 st.caption("*Bazat pe 5 features FFT antrenate pe 2041 imagini*")
                 if math_score_ai > 70:
                     st.error(f"**AI: {math_score_ai:.0f}%**")
@@ -175,7 +175,7 @@ if uploaded_file:
                 
                 st.markdown(f"**Verdict:** {math_verdict}")
                 
-                with st.expander("Debug - Valori Features"):
+                with st.expander("Debug - Valori features"):
                     st.markdown(f"""
                     **Drops:**
                     - 60→80%: {drop_60_80:.2f} dB
@@ -195,7 +195,7 @@ if uploaded_file:
             
             st.markdown("---")
             
-            st.markdown("### Metrici Numerice Complete")
+            st.markdown("### Metrici numerice complete")
             
             metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
             with metric_col1:
@@ -249,10 +249,12 @@ if uploaded_file:
                 if OPENAI_AVAILABLE and api_key_loaded:
                     st.markdown("### 🤖 Interpretare GPT-4o")
                     st.caption("*Analizeaza graficele FFT + analize suplimentare*")
-                    st.info("⏳ Rezultatul va aparea dupa ce toate graficele sunt generate")
+                    gpt_placeholder = st.empty()
+                    gpt_placeholder.info("⏳ Rezultatul va aparea dupa ce toate graficele sunt generate")
                 else:
                     st.markdown("#### Interpretare AI (Optional)")
                     st.warning("⚠️ OpenAI indisponibil - verifica API Key")
+                    gpt_placeholder = None
             
             st.markdown("---")
             
@@ -437,6 +439,17 @@ if uploaded_file:
                 with st.spinner("⏳ GPT-4o agrega toate datele..."):
                     try:
                         final = get_final_verdict(interpretations, features_dict, fft_patterns)
+                        
+                        # Actualizam placeholder-ul din verdict_col2
+                        if 'gpt_placeholder' in locals() and gpt_placeholder is not None:
+                            with gpt_placeholder.container():
+                                if final.get('verdict') == 'AI-GENERATED':
+                                    st.error(f"**{final['verdict']}**")
+                                elif final.get('verdict') == 'REAL':
+                                    st.success(f"**{final['verdict']}**")
+                                else:
+                                    st.warning(f"**{final.get('verdict', 'UNKNOWN')}**")
+                                st.caption(f"Confidence: {final.get('confidence', 0):.0f}%")
                         
                         vcol1, vcol2, vcol3 = st.columns([1, 2, 2])
                         
@@ -673,7 +686,7 @@ if uploaded_file:
                 else:
                     st.error("❌ Nicio metadata EXIF")
                     st.caption("⚠️ Imaginile AI generate rar contin EXIF data")
-                    st.caption("⚠️ Sau metadata a fost stearsa intențional")
+                    st.caption("⚠️ Sau metadata a fost stearsa intenționat")
             
             except Exception as e:
                 st.warning(f"Nu s-a putut citi EXIF: {str(e)}")
