@@ -5,6 +5,7 @@ OpenAI Vision Interpreter - FFT Analysis with GPT-4o/GPT-4o-mini
 from openai import OpenAI
 import base64
 import io
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -410,6 +411,276 @@ Dacă < 8 peaks SAU simetrie <70% → probabil REAL
     except Exception as e:
         return {'is_ai': None, 'confidence': 0, 'reasoning': f"Eroare: {str(e)}", 'indicators': []}
 
+def interpret_color_histogram(fig, r_std, g_std, b_std, api_key=None):
+    """
+    Interpretează graficul Color Histogram Distribution
+    
+    Parameters:
+    -----------
+    fig: matplotlib figure - Graficul color histogram
+    r_std: float - Standard deviation pentru canalul Red
+    g_std: float - Standard deviation pentru canalul Green
+    b_std: float - Standard deviation pentru canalul Blue
+    api_key: str - OpenAI API key
+    
+    Returns:
+    --------
+    dict: {
+        'is_ai': bool,
+        'confidence': float,  # 0-100
+        'reasoning': str,
+        'indicators': list
+    }
+    """
+    try:
+        client = get_openai_client(api_key)
+        
+        img_base64 = fig_to_base64(fig)
+        
+        # Calculează diferențele între canale
+        rg_diff = abs(r_std - g_std)
+        gb_diff = abs(g_std - b_std)
+        rb_diff = abs(r_std - b_std)
+        max_diff = max(rg_diff, gb_diff, rb_diff)
+        avg_std = (r_std + g_std + b_std) / 3
+        
+        prompt = f"""Ești un expert în analiza forensică digitală pentru detectarea imaginilor generate de AI.
+Ești în contextul unui proiect academic (TCSI - Teoria codarii si stocarii informatiei) și analizezi imagini pentru a identifica artefacte specifice generării prin inteligență artificială.
+
+Analizează acest histogram al distribuției culorilor RGB:
+
+VALORI NUMERICE EXACTE:
+- Red Std: {r_std:.2f}
+- Green Std: {g_std:.2f}
+- Blue Std: {b_std:.2f}
+- Avg Std: {avg_std:.2f}
+- Max Channel Diff: {max_diff:.2f}
+
+INDICATORI CHEIE:
+1. Balanța canalelor: Imagini naturale au std similare între R, G, B (diferență <5)
+2. AI-urile tind să genereze distribuții uniforme (std foarte apropiate)
+3. Std foarte mari (>60) = posibile artefacte de compresie sau procesare
+4. Std foarte mici (<30) = posibilă generare AI (smoothing exagerat)
+
+Răspunde în format JSON:
+{{
+    "is_ai": true/false,
+    "confidence": 0-100,
+    "reasoning": "Explicație detaliată bazată pe valorile numerice",
+    "indicators": ["listă", "de", "indicatori", "observați"]
+}}"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{img_base64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=500
+        )
+        
+        result_text = response.choices[0].message.content
+        result_json = json.loads(result_text)
+        
+        return {
+            'is_ai': result_json.get('is_ai', False),
+            'confidence': float(result_json.get('confidence', 50)),
+            'reasoning': result_json.get('reasoning', 'Analiză incompletă'),
+            'indicators': result_json.get('indicators', [])
+        }
+        
+    except Exception as e:
+        return {
+            'is_ai': False,
+            'confidence': 50,
+            'reasoning': f"Eroare interpretare Color Histogram: {str(e)}",
+            'indicators': []
+        }
+
+def interpret_gradient_magnitude(fig, mean_grad, std_grad, api_key=None):
+    """
+    Interpretează graficul Gradient Magnitude Distribution
+    
+    Parameters:
+    -----------
+    fig: matplotlib figure - Graficul gradient magnitude
+    mean_grad: float - Media gradientului
+    std_grad: float - Standard deviation al gradientului
+    api_key: str - OpenAI API key
+    
+    Returns:
+    --------
+    dict: {
+        'is_ai': bool,
+        'confidence': float,  # 0-100
+        'reasoning': str,
+        'indicators': list
+    }
+    """
+    try:
+        client = get_openai_client(api_key)
+        
+        img_base64 = fig_to_base64(fig)
+        
+        prompt = f"""Ești un expert în analiza forensică digitală pentru detectarea imaginilor generate de AI.
+Ești în contextul unui proiect academic (TCSI - Teoria codarii si stocarii informatiei) și analizezi imagini pentru a identifica artefacte specifice generării prin inteligență artificială.
+
+Analizează acest histogram al distribuției gradientului:
+
+VALORI NUMERICE EXACTE:
+- Mean Gradient: {mean_grad:.2f}
+- Std Gradient: {std_grad:.2f}
+
+INDICATORI CHEIE:
+1. Std < 15: AI smoothing (AI-urile generează tranziții prea netede)
+2. Std 15-25: Range natural pentru imagini reale
+3. Std > 25: Posibile texturi naturale complexe sau zgomot
+4. Mean < 10: Imagine foarte netedă (posibil AI)
+5. Mean > 30: Detalii fine naturale
+
+AI-urile tind să genereze gradienți uniformi cu std mică (lipsa texturii naturale).
+
+Răspunde în format JSON:
+{{
+    "is_ai": true/false,
+    "confidence": 0-100,
+    "reasoning": "Explicație detaliată bazată pe valorile numerice",
+    "indicators": ["listă", "de", "indicatori", "observați"]
+}}"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{img_base64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=500
+        )
+        
+        result_text = response.choices[0].message.content
+        result_json = json.loads(result_text)
+        
+        return {
+            'is_ai': result_json.get('is_ai', False),
+            'confidence': float(result_json.get('confidence', 50)),
+            'reasoning': result_json.get('reasoning', 'Analiză incompletă'),
+            'indicators': result_json.get('indicators', [])
+        }
+        
+    except Exception as e:
+        return {
+            'is_ai': False,
+            'confidence': 50,
+            'reasoning': f"Eroare interpretare Gradient Magnitude: {str(e)}",
+            'indicators': []
+        }
+
+def interpret_noise_pattern(fig, noise_std, api_key=None):
+    """
+    Interpretează graficul Noise Pattern Distribution
+    
+    Parameters:
+    -----------
+    fig: matplotlib figure - Graficul noise pattern
+    noise_std: float - Standard deviation al zgomotului
+    api_key: str - OpenAI API key
+    
+    Returns:
+    --------
+    dict: {
+        'is_ai': bool,
+        'confidence': float,  # 0-100
+        'reasoning': str,
+        'indicators': list
+    }
+    """
+    try:
+        client = get_openai_client(api_key)
+        
+        img_base64 = fig_to_base64(fig)
+        
+        prompt = f"""Ești un expert în analiza forensică digitală pentru detectarea imaginilor generate de AI.
+Ești în contextul unui proiect academic (TCSI - Teoria codarii si stocarii informatiei) și analizezi imagini pentru a identifica artefacte specifice generării prin inteligență artificială.
+
+Analizează acest histogram al distribuției zgomotului (noise pattern):
+
+VALOARE NUMERICĂ EXACTĂ:
+- Noise Std: {noise_std:.2f}
+
+INDICATORI CHEIE:
+1. Std < 5: AI denoising agresiv (imaginile AI sunt "prea curate")
+2. Std 5-20: Range natural pentru imagini fotografice
+3. Std > 20: Compression artifacts sau zgomot adăugat artificial
+4. Distribuție foarte strânsă: Caracteristică AI (smoothing)
+5. Distribuție largă: Caracteristică fotografii naturale
+
+AI-urile moderne aplică denoising puternic, rezultând std foarte mică.
+
+Răspunde în format JSON:
+{{
+    "is_ai": true/false,
+    "confidence": 0-100,
+    "reasoning": "Explicație detaliată bazată pe valoarea numerică",
+    "indicators": ["listă", "de", "indicatori", "observați"]
+}}"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{img_base64}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens=500
+        )
+        
+        result_text = response.choices[0].message.content
+        result_json = json.loads(result_text)
+        
+        return {
+            'is_ai': result_json.get('is_ai', False),
+            'confidence': float(result_json.get('confidence', 50)),
+            'reasoning': result_json.get('reasoning', 'Analiză incompletă'),
+            'indicators': result_json.get('indicators', [])
+        }
+        
+    except Exception as e:
+        return {
+            'is_ai': False,
+            'confidence': 50,
+            'reasoning': f"Eroare interpretare Noise Pattern: {str(e)}",
+            'indicators': []
+        }
+
 def get_final_verdict(interpretations, features_dict, fft_patterns):
     """
     Agregă toate interpretările individuale într-un verdict final
@@ -435,6 +706,9 @@ def get_final_verdict(interpretations, features_dict, fft_patterns):
             'radial_psd': interpretations.get('radial_psd', {}),
             'spectrum_2d': interpretations.get('spectrum_2d', {}),
             'angular_energy': interpretations.get('angular_energy', {}),
+            'color_histogram': interpretations.get('color_histogram', {}),
+            'gradient_magnitude': interpretations.get('gradient_magnitude', {}),
+            'noise_pattern': interpretations.get('noise_pattern', {}),
             'features': {
                 'tail_90': float(features_dict.get('tail_90', 0)),
                 'tail_80': float(features_dict.get('tail_80', 0)),
@@ -453,15 +727,15 @@ def get_final_verdict(interpretations, features_dict, fft_patterns):
         }
         
         import json
-        prompt = f"""Ești expert în detectarea deepfake. Ai analizat 3 grafice FFT individuale.
+        prompt = f"""Ești expert în detectarea deepfake. Ai analizat 6 grafice individuale (FFT + Color + Gradient + Noise).
 
 REZULTATE INDIVIDUALE:
 {json.dumps(summary, indent=2)}
 
 REGULI STRICTE PENTRU VERDICT:
-1. Dacă 2 sau 3 grafice spun "is_ai": false → Verdictul este REAL
-2. Dacă 2 sau 3 grafice spun "is_ai": true → Verdictul este AI-GENERATED
-3. Dacă rezultatele sunt 1-1-1 (mixte) → Ia în considerare confidence scores și features numerice
+1. Dacă 4 sau mai multe grafice spun "is_ai": false → Verdictul este REAL
+2. Dacă 4 sau mai multe grafice spun "is_ai": true → Verdictul este AI-GENERATED
+3. Dacă rezultatele sunt mixte (3-3) → Ia în considerare confidence scores și features numerice
 4. REAL = imaginea este autentică/fotografiată
 5. AI-GENERATED = imaginea este creată de AI (GAN, Stable Diffusion, Midjourney, etc.)
 
@@ -471,9 +745,9 @@ SARCINĂ:
 Analizează TOATE rezultatele și dă un VERDICT FINAL agregat.
 
 Consideră:
-- Cât de mulți indicatori sugerează AI?
+- Cât de multe grafice sugerează AI?
 - Consistența între grafice
-- Severitatea anomaliilor
+- Severitatea anomaliilor (FFT, Color, Gradient, Noise)
 - Features numerice
 
 ⚠️ OBLIGATORIU: Răspunde DOAR JSON valid, FĂRĂ markdown, FĂRĂ titluri!
@@ -483,7 +757,7 @@ Format exact:
   "confidence": 85,
   "reasoning": "Sinteza tuturor observațiilor",
   "key_findings": ["Finding 1", "Finding 2"],
-  "graph_votes": {{"radial_psd": "REAL", "spectrum_2d": "REAL", "angular_energy": "REAL"}},
+  "graph_votes": {{"radial_psd": "REAL", "spectrum_2d": "REAL", "angular_energy": "REAL", "color_histogram": "REAL", "gradient_magnitude": "REAL", "noise_pattern": "REAL"}},
   "recommendation": "Sfat final pentru utilizator"
 }}"""
         

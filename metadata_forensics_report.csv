@@ -1,0 +1,16 @@
+Feature,Value
+Best Model,Gradient Boosting
+Accuracy,51.47%
+AUC,0.5181
+""
+Top Features
+file_size_mb,1.0000
+megapixels,0.0000
+aspect_ratio,0.0000
+image_height,0.0000
+image_width,0.0000
+has_gps,0.0000
+software_is_mobile,0.0000
+software_is_photoshop,0.0000
+software_is_empty,0.0000
+has_identical_timestamps,0.0000

@@ -490,7 +490,6 @@ if uploaded_file:
                 ax3.legend()
                 ax3.grid(True, alpha=0.3)
                 st.pyplot(fig3)
-                plt.close(fig3)
                 
                 # Analiza simpla
                 r_std = np.std(img_array[:, :, 0])
@@ -501,6 +500,20 @@ if uploaded_file:
                     st.info("✅ Distribuție naturală - canale echilibrate")
                 else:
                     st.warning("⚠️ Distribuție neuniformă - posibilă procesare artificială")
+                
+                # Trimite la OpenAI
+                if OPENAI_AVAILABLE and api_key_loaded:
+                    with st.spinner("🤖 OpenAI analizeaza Color Histogram..."):
+                        try:
+                            from gemini_graph_interpreter import interpret_color_histogram
+                            color_result = interpret_color_histogram(fig3, r_std, g_std, b_std, api_key=OPENAI_API_KEY)
+                            interpretations['color_histogram'] = color_result
+                            
+                            st.markdown(f"**AI: {color_result.get('reasoning', 'N/A')}**")
+                        except Exception as e:
+                            st.warning(f"Eroare OpenAI: {str(e)}")
+                
+                plt.close(fig3)
             
             # 4. Gradient Magnitude Map
             with st.expander("📐 Gradient Magnitude - harta de detalii"):
@@ -525,7 +538,6 @@ if uploaded_file:
                 ax4b.grid(True, alpha=0.3)
                 
                 st.pyplot(fig4)
-                plt.close(fig4)
                 
                 mean_grad = np.mean(grad_magnitude)
                 std_grad = np.std(grad_magnitude)
@@ -534,6 +546,20 @@ if uploaded_file:
                     st.warning("⚠️ Gradient foarte uniform - posibil AI smoothing")
                 else:
                     st.info("✅ Gradient variat - texturi naturale")
+                
+                # Trimite la OpenAI
+                if OPENAI_AVAILABLE and api_key_loaded:
+                    with st.spinner("🤖 OpenAI analizeaza Gradient Magnitude..."):
+                        try:
+                            from gemini_graph_interpreter import interpret_gradient_magnitude
+                            gradient_result = interpret_gradient_magnitude(fig4, mean_grad, std_grad, api_key=OPENAI_API_KEY)
+                            interpretations['gradient_magnitude'] = gradient_result
+                            
+                            st.markdown(f"**AI: {gradient_result.get('reasoning', 'N/A')}**")
+                        except Exception as e:
+                            st.warning(f"Eroare OpenAI: {str(e)}")
+                
+                plt.close(fig4)
             
             # 5. Noise Pattern Analysis
             with st.expander("🔍 Noise Pattern - analiza zgomotului"):
@@ -557,7 +583,6 @@ if uploaded_file:
                 ax5b.grid(True, alpha=0.3)
                 
                 st.pyplot(fig5)
-                plt.close(fig5)
                 
                 noise_std = np.std(noise)
                 st.caption(f"📌 Noise Std Dev: {noise_std:.2f}")
@@ -567,6 +592,20 @@ if uploaded_file:
                     st.warning("⚠️ Zgomot foarte mare - posibil artifact compresie")
                 else:
                     st.info("✅ Zgomot natural - nivel acceptabil")
+                
+                # Trimite la OpenAI
+                if OPENAI_AVAILABLE and api_key_loaded:
+                    with st.spinner("🤖 OpenAI analizeaza Noise Pattern..."):
+                        try:
+                            from gemini_graph_interpreter import interpret_noise_pattern
+                            noise_result = interpret_noise_pattern(fig5, noise_std, api_key=OPENAI_API_KEY)
+                            interpretations['noise_pattern'] = noise_result
+                            
+                            st.markdown(f"**AI: {noise_result.get('reasoning', 'N/A')}**")
+                        except Exception as e:
+                            st.warning(f"Eroare OpenAI: {str(e)}")
+                
+                plt.close(fig5)
             
             # 6. EXIF Metadata
             st.markdown("---")
