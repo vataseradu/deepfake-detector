@@ -38,7 +38,7 @@ st.set_page_config(
 st.title("Deepfake Detector")
 st.markdown("**Tema de cercetare - VATASE Radu-Petrut**")
 st.caption("🎓 TCSI - Teoria codarii si stocarii informatiei")
-st.caption("TCSI - Teoria codarii si stocarii informatiei")
+st.info("🔬 **Metodă:** Analiză FFT (Fast Fourier Transform) antrenată pe dataset-uri de imagini reale și generate AI")
 
 uploaded_file = st.file_uploader("Upload imagine", type=['jpg', 'jpeg', 'png'])
 
@@ -232,13 +232,14 @@ if uploaded_file:
             
             st.markdown("---")
             
-            st.markdown("## 📊 Verdict Final")
+            st.markdown("## 🎯 VERDICT PRINCIPAL")
+            st.caption("📊 Bazat pe analiza frecvențială FFT - antrenat pe dataset-uri validate")
             
             verdict_col1, verdict_col2 = st.columns(2)
             
             with verdict_col1:
-                st.markdown("### 🔬 Verdict Matematic (FFT)")
-                st.caption("Bazat pe analiză frecvențială antrenată pe dataset-uri")
+                st.markdown("### 🔬 Analiză Matematică FFT")
+                st.caption("Dataset: imagini reale vs. generate AI (Stable Diffusion, Midjourney, GAN)")
                 
                 if math_score_ai > 70:
                     st.error(f"### {math_score_ai:.0f}% SUSPICIUNE AI")
@@ -261,11 +262,11 @@ if uploaded_file:
             
             with verdict_col2:
                 if OPENAI_AVAILABLE and api_key_loaded:
-                    st.markdown("### 🤖 Verdict OpenAI (gpt-4o)")
-                    st.caption("Interpretare AI a graficelor FFT")
-                    st.info("Se va calcula după analiză grafice...")
+                    st.markdown("### 🤖 Interpretare Grafice (gpt-4o)")
+                    st.caption("⚠️ OpenAI primește DOAR graficele FFT, NU imaginea")
+                    st.info("📈 Se va calcula după generare grafice...")
                 else:
-                    st.markdown("### 🤖 Verdict OpenAI")
+                    st.markdown("### 🤖 Interpretare AI (Opțional)")
                     st.warning("OpenAI indisponibil - verifică API Key")
             
             st.markdown("---")
@@ -440,8 +441,8 @@ if uploaded_file:
             st.markdown("---")
             
             if OPENAI_AVAILABLE and api_key_loaded and interpretations:
-                st.markdown("## 🤖 Verdict Final OpenAI")
-                st.caption("Interpretare agregată a tuturor graficelor FFT")
+                st.markdown("## � Interpretare Suplimentară OpenAI")
+                st.caption("📈 Analiză AI DOAR pe graficele FFT (fără acces la imaginea originală)")
                 
                 with st.spinner("OpenAI agregă toate analizele..."):
                     try:
