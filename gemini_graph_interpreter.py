@@ -21,7 +21,7 @@ except:
 if not OPENAI_API_KEY:
     OPENAI_API_KEY = "sk-proj-your-key-here"
 
-OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
 def get_openai_client(api_key=None):
     """Creates OpenAI client"""
