@@ -97,40 +97,52 @@ if uploaded_file:
                 'drop_80_90': drop_80_90
             }
             
-            math_score_ai = 0
-            
-            if drop_80_90 < 3:
-                math_score_ai += 35
-            elif drop_80_90 < 6:
-                math_score_ai += 15
-            elif drop_80_90 > 18:
-                math_score_ai += 20
-            elif 8 <= drop_80_90 <= 15:
-                math_score_ai -= 25
-            
-            hf_lf = features_dict['hf_lf_ratio']
-            if hf_lf > 0.8:
-                math_score_ai += 25
-            elif hf_lf > 0.6:
-                math_score_ai += 10
-            elif hf_lf < 0.3:
-                math_score_ai -= 20
-            
-            linearity = abs(features_dict['decay_linearity'])
-            if linearity < 0.5:
-                math_score_ai += 20
-            elif linearity > 0.85:
-                math_score_ai -= 15
-            
-            if features_dict['std_power'] > 25:
-                math_score_ai += 10
-            elif features_dict['std_power'] < 10:
-                math_score_ai -= 10
-            
-            if 8 <= drop_60_80 <= 20 and 8 <= drop_80_90 <= 15:
-                math_score_ai -= 20
-            
-            math_score_ai = max(0, min(100, math_score_ai + 45))
+            # Try to load Random Forest model trained on FACE dataset
+            try:
+                import pickle
+                import os
+                model_path = os.path.join(os.path.dirname(__file__), 'face_rf_simple.pkl')
+                if os.path.exists(model_path):
+                    with open(model_path, 'rb') as f:
+                        rf_model = pickle.load(f)
+                    
+                    # Extract 5 features used in training
+                    X_features = np.array([[
+                        features_dict['tail_70'],
+                        features_dict['tail_80'],
+                        features_dict['tail_90'],
+                        features_dict['hf_lf_ratio'],
+                        features_dict['std_power']
+                    ]])
+                    
+                    # Get probability prediction
+                    proba = rf_model.predict_proba(X_features)[0]
+                    # proba[0] = P(REAL), proba[1] = P(FAKE)
+                    math_score_ai = proba[1] * 100
+                    
+                else:
+                    # Fallback: neutral score if model not found
+                    math_score_ai = 50
+            except Exception as e:
+                # Fallback heuristics (INVERTED for FACE dataset)
+                math_score_ai = 50
+                
+                # For FACE: LOWER hf_lf suggests AI (reversed from old logic)
+                hf_lf = features_dict['hf_lf_ratio']
+                if hf_lf < 0.60:
+                    math_score_ai += 20
+                elif hf_lf < 0.65:
+                    math_score_ai += 10
+                elif hf_lf > 0.75:
+                    math_score_ai -= 15
+                
+                # Tail flatness
+                if features_dict['tail_90'] > -0.005:
+                    math_score_ai += 15
+                elif features_dict['tail_90'] < -0.01:
+                    math_score_ai -= 10
+                
+                math_score_ai = max(0, min(100, math_score_ai))
             math_verdict = "AI-GENERATED" if math_score_ai > 60 else "REAL"
             
             fft_patterns = {
