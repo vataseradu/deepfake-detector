@@ -37,8 +37,8 @@ st.set_page_config(
 
 st.title("Deepfake Detector")
 st.markdown("**Tema de cercetare - VATASE Radu-Petrut**")
-st.caption("🎓 TCSI - Teoria codarii si stocarii informatiei")
-st.info("🔬 **Metodă:** Analiză FFT (Fast Fourier Transform) antrenată pe dataset-uri de imagini reale și generate AI")
+st.caption("TCSI - Teoria codarii si stocarii informatiei")
+st.info("Metoda: Analiza FFT (Fast Fourier Transform) antrenata pe dataset-uri de imagini reale si generate AI")
 
 uploaded_file = st.file_uploader("Upload imagine", type=['jpg', 'jpeg', 'png'])
 
@@ -180,16 +180,6 @@ if uploaded_file:
                     - 80%: {features_dict['tail_80']:.3f} dB/px
                     """)
             
-            with score_col2:
-                st.markdown("#### Scor OpenAI")
-                st.markdown("*(Va fi calculat mai jos)*")
-                st.info("Se calculează...")
-            
-            with score_col3:
-                st.markdown("#### Verdict Combinat")
-                st.markdown("*(Final: Math 60% + AI 40%)*")
-                st.info("Se calculează...")
-            
             st.markdown("---")
             
             st.markdown("### Metrici Numerice Complete")
@@ -232,13 +222,13 @@ if uploaded_file:
             
             st.markdown("---")
             
-            st.markdown("## 🎯 VERDICT PRINCIPAL")
-            st.caption("📊 Bazat pe analiza frecvențială FFT - antrenat pe dataset-uri validate")
+            st.markdown("## VERDICT PRINCIPAL")
+            st.caption("Bazat pe analiza frecventiala FFT - antrenat pe dataset-uri validate")
             
             verdict_col1, verdict_col2 = st.columns(2)
             
             with verdict_col1:
-                st.markdown("### 🔬 Analiză Matematică FFT")
+                st.markdown("### Analiza Matematica FFT")
                 st.caption("Dataset: imagini reale vs. generate AI (Stable Diffusion, Midjourney, GAN)")
                 
                 if math_score_ai > 70:
@@ -262,12 +252,12 @@ if uploaded_file:
             
             with verdict_col2:
                 if OPENAI_AVAILABLE and api_key_loaded:
-                    st.markdown("### 🤖 Interpretare Grafice (gpt-4o)")
-                    st.caption("⚠️ OpenAI primește DOAR graficele FFT, NU imaginea")
-                    st.info("📈 Se va calcula după generare grafice...")
+                    st.markdown("### Interpretare Grafice (gpt-4o)")
+                    st.caption("OpenAI primeste DOAR graficele FFT, NU imaginea")
+                    st.info("Se va calcula dupa generare grafice...")
                 else:
-                    st.markdown("### 🤖 Interpretare AI (Opțional)")
-                    st.warning("OpenAI indisponibil - verifică API Key")
+                    st.markdown("### Interpretare AI (Optional)")
+                    st.warning("OpenAI indisponibil - verifica API Key")
             
             st.markdown("---")
             
@@ -276,7 +266,7 @@ if uploaded_file:
             st.markdown("### 1. FFT Radial PSD")
             
             if psd1D is not None:
-                with st.expander("📈 Afișează grafic FFT Radial PSD", expanded=False):
+                with st.expander("Afiseaza grafic FFT Radial PSD", expanded=False):
                     fig1, ax1 = plt.subplots(figsize=(12, 6))
                     radial_freqs = np.arange(len(psd1D))
                     
@@ -406,7 +396,7 @@ if uploaded_file:
             st.markdown("### 2. Spectru 2D FFT")
             
             if magnitude_2d is not None:
-                with st.expander("📈 Afișează grafic Spectru 2D FFT", expanded=False):
+                with st.expander("Afiseaza grafic Spectru 2D FFT", expanded=False):
                     fig2, ax2 = plt.subplots(figsize=(10, 10))
                     im = ax2.imshow(magnitude_2d, cmap='hot', aspect='auto')
                     ax2.set_title('FFT 2D Spectrum', fontsize=15, fontweight='bold')
@@ -441,8 +431,8 @@ if uploaded_file:
             st.markdown("---")
             
             if OPENAI_AVAILABLE and api_key_loaded and interpretations:
-                st.markdown("## � Interpretare Suplimentară OpenAI")
-                st.caption("📈 Analiză AI DOAR pe graficele FFT (fără acces la imaginea originală)")
+                st.markdown("## Interpretare Suplimentara OpenAI")
+                st.caption("Analiza AI DOAR pe graficele FFT (fara acces la imaginea originala)")
                 
                 with st.spinner("OpenAI agregă toate analizele..."):
                     try:
@@ -477,9 +467,7 @@ if uploaded_file:
                         with st.expander("📋 Raționament Complet OpenAI"):
                             st.write(final.get('reasoning', 'N/A'))
                         
-                        if final.get('recommendation'):
-                            st.info(f"**Recomandare:** {final['recommendation']}")
-                        
+
                     except Exception as e:
                         st.error(f"Eroare verdict final: {str(e)}")
                         import traceback
