@@ -193,7 +193,7 @@ fig = plot_spectrum(image)
 fig.savefig("frequency_analysis.png")
 ```
 
-## 🎓 Academic References
+##  Academic References
 
 1. **Krawetz, N. (2007)** - "A Picture's Worth..." - FotoForensics blog
    - Foundation of Error Level Analysis
@@ -215,24 +215,24 @@ fig.savefig("frequency_analysis.png")
 - **Error Handling:** Graceful image loading and processing errors
 
 ### Streamlit Best Practices (2026)
-- ✅ Use `use_container_width=True` instead of deprecated `width` parameter
-- ✅ Implement tabs for multi-module interfaces
-- ✅ Provide sidebar configuration options
+-  Use `use_container_width=True` instead of deprecated `width` parameter
+-  Implement tabs for multi-module interfaces
+-  Provide sidebar configuration options
 
 ### Security & Privacy
-- ✅ No API keys committed to repository
-- ✅ No personal paths in source code
-- ✅ All sensitive data in `.gitignore`
-- ✅ See [SETUP_LOCAL.md](SETUP_LOCAL.md) for local configuration
+-  No API keys committed to repository
+-  No personal paths in source code
+-  All sensitive data in `.gitignore`
+-  See [SETUP_LOCAL.md](SETUP_LOCAL.md) for local configuration
 
-## 📚 Documentation Files
+##  Documentation Files
 
 - **[SETUP_LOCAL.md](SETUP_LOCAL.md)** - Local development setup & API configuration
 - **[TESTING_GUIDE_v2.md](TESTING_GUIDE_v2.md)** - Comprehensive testing procedures
 - **[IMPROVEMENTS_SUMMARY.md](IMPROVEMENTS_SUMMARY.md)** - All enhancements log
 - **[FIX_REAL_CLASSIFICATION.md](FIX_REAL_CLASSIFICATION.md)** - Bug fixes documentation
 
-## 🔮 Future Enhancements
+##  Future Enhancements
 
 - [ ] C2PA/CAI metadata verification
 - [ ] Deep learning classifier (CNN-based)
@@ -241,13 +241,10 @@ fig.savefig("frequency_analysis.png")
 - [ ] Real-time webcam analysis
 - [ ] REST API endpoint
 
-## 📝 License
-
-Master's Thesis Research Project - Academic Use
 
 ## 👤 Author
 
-Master's Thesis Project | 2026
+Vatase Radu | 2026
 
 ---
 
