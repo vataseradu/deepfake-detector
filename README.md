@@ -9,6 +9,7 @@ Advanced deepfake detection system using FFT (Fast Fourier Transform) analysis c
 
 ### Live Demo
 **Paper:** https://vataseradu.github.io/posts/2026-01-deepfake-detector/
+.
 **Try the application here:** [Streamlit Cloud Link](https://deepfake-detector-tcsivtstcsitcsi.streamlit.app/)
 
 ## Features
