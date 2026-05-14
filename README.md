@@ -8,7 +8,7 @@
 Advanced deepfake detection system using FFT (Fast Fourier Transform) analysis combined with OpenAI GPT-4o-mini for intelligent interpretation of frequency domain patterns.
 
 ### Live Demo
-
+**Paper:** https://vataseradu.github.io/posts/2026-01-deepfake-detector/
 **Try the application here:** [Streamlit Cloud Link](https://deepfake-detector-tcsivtstcsitcsi.streamlit.app/)
 
 ## Features
